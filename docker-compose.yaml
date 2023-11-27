@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: ./docker/dev
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+      - ./.go/pkg:/go/pkg
+      - ./.go-cache:/go-cache
+      - $GOPATH/pkg/mod/cache:/go/pkg/mod/cache
+    working_dir: /app
+    ports:
+      - "5005:5005"
+    env_file:
+      - .env
+    environment:
+      GOCACHE: /go-cache
+  migrate:
+    image: migrate/migrate
+    volumes:
+      - .:/app
+    working_dir: /app
+    env_file:
+      - .env
+    profiles:
+      - donotstart
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: marketplace_db
+    ports:
+      - "5432"
