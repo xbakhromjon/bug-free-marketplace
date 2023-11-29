@@ -7,13 +7,13 @@ type ShopService interface {
 }
 
 type shopService struct {
-	shopRepo domain.ShopRepository
+	repository domain.ShopRepository
 }
 
-func NewShopService(shopRepo domain.ShopRepository) ShopService {
-	return &shopService{shopRepo: shopRepo}
+func NewShopService(repository domain.ShopRepository) ShopService {
+	return &shopService{repository: repository}
 }
 
 func (s *shopService) Create(req domain.NewShop) (int, error) {
-	return s.shopRepo.Save(req)
+	return s.repository.Save(req)
 }

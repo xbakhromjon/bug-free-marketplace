@@ -12,7 +12,3 @@ type NewShop struct {
 	Name    string
 	OwnerId int
 }
-
-type ShopRepository interface {
-	Save(shop NewShop) (int, error)
-}

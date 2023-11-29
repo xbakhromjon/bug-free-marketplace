@@ -1,25 +1,24 @@
-package adapter
+package adapters
 
 import (
+	"database/sql"
 	"fmt"
 	"golang-project-template/internal/shop/domain"
-
-	"github.com/jmoiron/sqlx"
 )
 
 var (
 	shopTableName = "shop"
 )
 
-type shopPostgres struct {
-	db *sqlx.DB
+type shopPostgresRepo struct {
+	db *sql.DB
 }
 
-func NewShopPostgres(db *sqlx.DB) domain.ShopRepository {
-	return &shopPostgres{db: db}
+func NewShopRepository(db *sql.DB) domain.ShopRepository {
+	return &shopPostgresRepo{db: db}
 }
 
-func (s *shopPostgres) Save(shop domain.NewShop) (int, error) {
+func (s *shopPostgresRepo) Save(shop domain.NewShop) (int, error) {
 	var id int
 
 	createShopQuery := fmt.Sprintf(`
