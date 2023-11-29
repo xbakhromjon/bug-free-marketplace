@@ -1,16 +1,18 @@
 package domain
 
 type Shop struct {
-	Id     int
-	Name   string
-	UserId int
+	Id        int
+	Name      string
+	OwnerId   int
+	CreatedAt string
+	UpdatedAt string
 }
 
 type NewShop struct {
-	Name   string
-	UserId int
+	Name    string
+	OwnerId int
 }
 
 type ShopRepository interface {
-	Save(shop Shop) (int, error)
+	Save(shop NewShop) (int, error)
 }
