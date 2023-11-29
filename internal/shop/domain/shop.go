@@ -5,18 +5,9 @@ type Shop struct {
 	Name string
 }
 
-type ShopRequest struct {
+type NewShop struct {
 	Id   int
 	Name string
-}
-
-type ShopResponse struct {
-	Id   int
-	Name string
-}
-
-type ShopUseCase interface {
-	Create(req ShopRequest) (int, error)
 }
 
 type ShopRepository interface {

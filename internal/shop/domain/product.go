@@ -6,20 +6,15 @@ type Product struct {
 	Price int
 }
 
-type ProductRequest struct {
-	Id    int
-	Name  string
-	Price int
+type NewProduct struct {
+	Id     int
+	Name   string
+	Price  int
+	ShopId int
 }
 
-type ProductResponse struct {
-	Id    int
-	Name  string
-	Price int
-}
-
-type ProductUseCase interface {
-	Add(req *ProductRequest) (int, error)
-	GetOne(id int) (*ProductResponse, error)
-	GetAllShopProducts(shopId int) ([]*ProductResponse, error)
+type ProductRepository interface {
+	Save(product *Product) (int, error)
+	GetById(id int) (*Product, error)
+	GetAllByShopId(shopId int) ([]*Product, error)
 }
