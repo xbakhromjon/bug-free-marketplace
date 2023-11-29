@@ -3,6 +3,8 @@ export
 
 DOCKER_COMPOSE_FILE=docker-compose.yaml
 
+arg = $(filter-out $@,$(MAKECMDGOALS))
+
 # proto
 .PHONY: proto-gen
 proto-gen:
@@ -48,3 +50,15 @@ migration-generate:
 	@echo "Generation migration file $(name)"
 	sleep 2
 	docker-compose run --rm migrate create -ext sql -dir ./migrations -seq $(name)
+
+.PHONY: mod-download
+mod-download:
+	@echo "Go mod download"
+	sleep 2
+	docker-compose exec app go mod download
+
+.PHONY: go-get
+go-get:
+	@echo "Go get ${arg}"
+	sleep 2
+	docker-compose exec app go get -d ${arg}
