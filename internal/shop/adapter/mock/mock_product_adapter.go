@@ -3,7 +3,6 @@ package mock
 import (
 	"database/sql"
 	"fmt"
-	"golang-project-template/internal/shop/adapter"
 	"golang-project-template/internal/shop/domain"
 )
 
@@ -28,7 +27,7 @@ func (m *mockProductAdapter) FindById(id int) (*domain.Product, error) {
 			ShopId: 1,
 		}, nil
 	}
-	return nil, &adapter.ErrProductNotFound{Err: fmt.Sprintf("Product not found with %d", id)}
+	return nil, &domain.ErrProductNotFound{Err: fmt.Sprintf("Product not found with %d", id)}
 }
 
 func (m *mockProductAdapter) FindAllByShopId(shopId int) ([]*domain.Product, error) {

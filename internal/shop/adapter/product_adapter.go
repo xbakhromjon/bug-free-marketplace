@@ -25,7 +25,7 @@ func (p *productAdapter) FindById(id int) (*domain.Product, error) {
 	row, err := p.db.Query(`select p.id, p.name, p.price, p.shop_id from products p where p.id = $1`, id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, &ErrProductNotFound{fmt.Sprintf("Product not found with %d id", id)}
+			return nil, &domain.ErrProductNotFound{fmt.Sprintf("Product not found with %d id", id)}
 		}
 	}
 	var product domain.Product
