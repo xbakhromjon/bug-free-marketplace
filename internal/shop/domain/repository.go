@@ -1,7 +1,11 @@
 package domain
 
+import "errors"
+
+var saveShopError = errors.New("save shop error")
+
 type ShopRepository interface {
-	Save(shop Shop) (int, error)
+	Save(shop NewShop) (int, error)
 }
 
 type ProductRepository interface {
