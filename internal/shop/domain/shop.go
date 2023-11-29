@@ -9,6 +9,6 @@ type Shop struct {
 }
 
 type NewShop struct {
-	Name    string
+	Name   string
 	OwnerId int
 }
