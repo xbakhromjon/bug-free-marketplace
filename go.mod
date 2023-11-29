@@ -2,7 +2,11 @@ module golang-project-template
 
 go 1.21.1
 
-require github.com/spf13/cobra v1.8.0
+require (
+	github.com/lib/pq v1.10.9
+	github.com/spf13/cobra v1.8.0
+	golang.org/x/crypto v0.16.0
+)
 
 require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect

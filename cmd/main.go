@@ -1,7 +1,9 @@
 package main
 
-import "golang-project-template/cmd/app"
+import (
+	_ "github.com/lib/pq"
+)
 
 func main() {
-	app.Execute()
+
 }
