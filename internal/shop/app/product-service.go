@@ -29,7 +29,6 @@ func (uc ProductUseCaseImpl) Add(req domain.NewProduct) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-
 	return id, nil
 }
 
