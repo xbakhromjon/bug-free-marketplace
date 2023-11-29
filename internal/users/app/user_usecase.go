@@ -12,28 +12,35 @@ type userUsecase struct {
 	f              domain.UserFactory
 }
 
-func NewUserUsecase(userRepository domain.UserRepository) domain.UserUsecase {
+type UserUsecase interface {
+	RegisterUser(user *domain.NewUser) (int, error)
+	LoginUser(phoneNumber, pass string) (bool, error)
+	GetUserDataPhoneNumber(phoneNumber string) (*domain.User, error)
+}
+
+func NewUserUsecase(userRepository domain.UserRepository) UserUsecase {
 	return &userUsecase{
 		userRepository: userRepository,
 	}
 }
 
-func (u *userUsecase) RegisterUser(user *domain.User) (*domain.User, error) {
+func (u *userUsecase) RegisterUser(newUser *domain.NewUser) (int, error) {
+	userFromFactory := domain.CreateUserFactory(newUser)
+	id, err := u.userRepository.Save(userFromFactory)
 
-	user, err := u.userRepository.Create(user)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
-	return user, nil
+	return id, nil
 }
 
 func (u *userUsecase) LoginUser(phoneNumber, pass string) (bool, error) {
-	user, err := u.userRepository.GetByPhoneNumber(phoneNumber)
+	user, err := u.userRepository.FindOneByPhoneNumber(phoneNumber)
 	if err != nil {
 		return false, err
 	}
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(pass))
+	err = bcrypt.CompareHashAndPassword([]byte(user.GetPassword()), []byte(pass))
 	if err != nil {
 		return false, errors.New("Invalid phone number or password")
 	}
@@ -41,12 +48,11 @@ func (u *userUsecase) LoginUser(phoneNumber, pass string) (bool, error) {
 	return true, nil
 }
 
-func (u *userUsecase) GetUserDataByID(userID int) (*domain.User, error) {
-	user, err := u.userRepository.GetByID(userID)
+func (u *userUsecase) GetUserDataPhoneNumber(phoneNumber string) (*domain.User, error) {
+	user, err := u.userRepository.FindOneByPhoneNumber(phoneNumber)
 	if err != nil {
 		return nil, err
 	}
-	retrievedUser := u.f.MapUserData(user.ID, user.Name, user.PhoneNumber, user.Role, user.CreatedAt)
 
-	return retrievedUser, nil
+	return user, nil
 }

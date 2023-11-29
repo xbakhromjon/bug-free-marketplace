@@ -1,8 +1,7 @@
 package main
 
-import (
-	_ "github.com/lib/pq"
-)
+type user struct {
+}
 
 func main() {
 
