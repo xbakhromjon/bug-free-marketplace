@@ -12,9 +12,3 @@ type NewProduct struct {
 	Price  int
 	ShopId int
 }
-
-type ProductRepository interface {
-	Save(product *Product) (int, error)
-	FindById(id int) (*Product, error)
-	FindAllByShopId(shopId int) ([]*Product, error)
-}
