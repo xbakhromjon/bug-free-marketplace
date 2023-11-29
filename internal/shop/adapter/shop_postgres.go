@@ -1,9 +1,14 @@
 package adapter
 
 import (
+	"fmt"
 	"golang-project-template/internal/shop/domain"
 
 	"github.com/jmoiron/sqlx"
+)
+
+var (
+	shopTableName = "shop"
 )
 
 type shopPostgres struct {
@@ -17,8 +22,8 @@ func NewShopPostgres(db *sqlx.DB) domain.ShopRepository {
 func (s *shopPostgres) Save(shop domain.NewShop) (int, error) {
 	var id int
 
-	createShopQuery := `
-		INSERT INTO shop(
+	createShopQuery := fmt.Sprintf(`
+		INSERT INTO %s(
 			name,
 			owner_id
 		)
@@ -26,7 +31,7 @@ func (s *shopPostgres) Save(shop domain.NewShop) (int, error) {
 			($1, $2)
 		RETURNING
 			id
-	`
+	`, shopTableName)
 
 	err := s.db.QueryRow(
 		createShopQuery,
