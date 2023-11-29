@@ -3,7 +3,6 @@ package app
 import (
 	"errors"
 	"fmt"
-	"golang-project-template/internal/shop/adapter"
 	"golang-project-template/internal/shop/adapter/mock"
 	"golang-project-template/internal/shop/domain"
 	"reflect"
@@ -29,14 +28,14 @@ func TestGetOneProduct(t *testing.T) {
 	t.Run("with invalid id", func(t *testing.T) {
 		id := 2
 		_, err := underTest.GetOne(id)
-		want := adapter.ErrProductNotFound{Err: fmt.Sprintf("Product not found with %d", id)}
+		want := domain.ErrProductNotFound{Err: fmt.Sprintf("Product not found with %d", id)}
 
 		if err == nil {
 			t.Errorf("expected %T, got nil", want)
 			return
 		}
 
-		var got *adapter.ErrProductNotFound
+		var got *domain.ErrProductNotFound
 		if !errors.As(err, &got) {
 			t.Errorf("want %T, got %T", want, err)
 		}

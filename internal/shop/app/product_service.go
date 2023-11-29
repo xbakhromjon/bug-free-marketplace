@@ -1,8 +1,6 @@
 package app
 
 import (
-	"database/sql"
-	"golang-project-template/internal/shop/adapter"
 	"golang-project-template/internal/shop/domain"
 )
 
@@ -12,9 +10,9 @@ type ProductService interface {
 	GetAllByShopId(shopId int) ([]*domain.Product, error)
 }
 
-func NewProductService(db *sql.DB) ProductService {
+func NewProductService(repository domain.ProductRepository) ProductService {
 
-	return &productService{repository: adapter.NewProductAdapter(db)}
+	return &productService{repository: repository}
 }
 
 type productService struct {

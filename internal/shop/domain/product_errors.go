@@ -1,4 +1,4 @@
-package adapter
+package domain
 
 type ErrProductNotFound struct {
 	Err string
