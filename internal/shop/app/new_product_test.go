@@ -11,26 +11,6 @@ type MockProductRepository struct {
 	SaveFunc func(product *domain.Product) (int, error)
 }
 
-func (m *MockProductRepository) GetById(id int) (*domain.Product, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (m *MockProductRepository) GetAllByShopId(shopId int) ([]*domain.Product, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (m *MockProductRepository) FindById(id int) (*domain.Product, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (m *MockProductRepository) FindAllByShopId(shopId int) ([]*domain.Product, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
 func (m *MockProductRepository) Save(product *domain.Product) (int, error) {
 	if m.SaveFunc != nil {
 		return m.SaveFunc(product)
@@ -70,4 +50,25 @@ func TestNewProductUseCase(t *testing.T) {
 			assert.Equal(t, tc.expectedError, err, "Error mismatch")
 		})
 	}
+}
+
+// unuseful methods
+func (m *MockProductRepository) GetById(id int) (*domain.Product, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *MockProductRepository) GetAllByShopId(shopId int) ([]*domain.Product, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *MockProductRepository) FindById(id int) (*domain.Product, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *MockProductRepository) FindAllByShopId(shopId int) ([]*domain.Product, error) {
+	//TODO implement me
+	panic("implement me")
 }
