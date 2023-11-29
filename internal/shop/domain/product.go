@@ -1,13 +1,13 @@
 package domain
 
 type Product struct {
-	Id    int
-	Name  string
-	Price int
+	Id     int
+	Name   string
+	Price  int
+	ShopId int
 }
 
 type NewProduct struct {
-	Id     int
 	Name   string
 	Price  int
 	ShopId int
@@ -15,6 +15,6 @@ type NewProduct struct {
 
 type ProductRepository interface {
 	Save(product *Product) (int, error)
-	GetById(id int) (*Product, error)
-	GetAllByShopId(shopId int) ([]*Product, error)
+	FindById(id int) (*Product, error)
+	FindAllByShopId(shopId int) ([]*Product, error)
 }
