@@ -1,9 +1,5 @@
 package domain
 
-import "errors"
-
-var saveShopError = errors.New("save shop error")
-
 type ShopRepository interface {
 	Save(shop NewShop) (int, error)
 }
@@ -16,6 +12,7 @@ type ProductRepository interface {
 
 const (
 	ErrProductNotFound = Err("product not found")
+	ErrInvalidShopName = Err("invalid shop name")
 )
 
 type Err string

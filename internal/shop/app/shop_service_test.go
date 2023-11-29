@@ -1,19 +1,16 @@
 package app
 
 import (
-	"errors"
 	"golang-project-template/internal/shop/domain"
 	"testing"
 )
 
-var mockedError = errors.New("mocked error")
-
 func (m *mockShopRepo) Save(shop domain.NewShop) (int, error) {
-	if shop.Name == "Test Shop" && shop.OwnerId == 1 {
-		return 1, nil
+	if shop.Name == "" {
+		return 0, domain.ErrInvalidShopName
 	}
 
-	return 0, mockedError
+	return 1, nil
 }
 
 type mockShopRepo struct {
@@ -36,10 +33,10 @@ func TestCreateShop(t *testing.T) {
 		}
 
 	})
-	t.Run("Error saving shop", func(t *testing.T) {
-		wanted := mockedError
+	t.Run("invalid shop name", func(t *testing.T) {
+		wanted := domain.ErrInvalidShopName
 
-		_, err := underTest.Create(domain.NewShop{Name: "failed name", OwnerId: 2})
+		_, err := underTest.Create(domain.NewShop{Name: "", OwnerId: 1})
 
 		if err == nil {
 			t.Error("Expected an error, but got nil")
