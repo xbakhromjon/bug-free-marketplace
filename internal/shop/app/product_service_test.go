@@ -1,26 +1,18 @@
 package app
 
 import (
-	"errors"
-	"fmt"
-	"golang-project-template/internal/shop/adapter/mock"
 	"golang-project-template/internal/shop/domain"
-	"reflect"
 	"testing"
 )
 
 func TestGetOneProduct(t *testing.T) {
-	underTest := productService{repository: mock.NewMockProductAdapter(nil)}
+	underTest := productService{repository: newMockProductRepo()}
 	t.Run("with correct id", func(t *testing.T) {
-		id := 1
-		got, _ := underTest.GetOne(id)
-		want := domain.Product{
-			Id:     id,
-			Name:   "T-shirt",
-			Price:  100,
-			ShopId: 1,
-		}
-		if !reflect.DeepEqual(want, *got) {
+		p := newValidProduct()
+		got, _ := underTest.GetOne(p.Id)
+		want := p
+
+		if *got != *want {
 			t.Errorf("want %+v but got %+v", want, got)
 		}
 	})
@@ -28,16 +20,49 @@ func TestGetOneProduct(t *testing.T) {
 	t.Run("with invalid id", func(t *testing.T) {
 		id := 2
 		_, err := underTest.GetOne(id)
-		want := domain.ErrProductNotFound{Err: fmt.Sprintf("Product not found with %d", id)}
+		want := domain.ErrProductNotFound
 
 		if err == nil {
 			t.Errorf("expected %T, got nil", want)
 			return
 		}
 
-		var got *domain.ErrProductNotFound
-		if !errors.As(err, &got) {
+		if err != domain.ErrProductNotFound {
 			t.Errorf("want %T, got %T", want, err)
 		}
 	})
+}
+
+type mockProductRepo struct {
+}
+
+func newMockProductRepo() domain.ProductRepository {
+	return &mockProductRepo{}
+}
+
+func (m *mockProductRepo) FindById(id int) (*domain.Product, error) {
+	if id == 1 {
+		return newValidProduct(), nil
+	}
+
+	return nil, domain.ErrProductNotFound
+}
+
+func (m *mockProductRepo) Save(product *domain.Product) (int, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *mockProductRepo) FindAllByShopId(shopId int) ([]*domain.Product, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func newValidProduct() *domain.Product {
+	return &domain.Product{
+		Id:     1,
+		Name:   "T-shirt",
+		Price:  100,
+		ShopId: 1,
+	}
 }
