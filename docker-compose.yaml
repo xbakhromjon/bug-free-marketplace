@@ -9,7 +9,6 @@ services:
       - .:/app
       - ./.go/pkg:/go/pkg
       - ./.go-cache:/go-cache
-      - $GOPATH/pkg/mod/cache:/go/pkg/mod/cache
     working_dir: /app
     ports:
       - "5005:5005"
