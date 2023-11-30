@@ -46,3 +46,35 @@ func (s *shopPostgresRepo) Save(shop domain.NewShop) (int, error) {
 
 	return id, nil
 }
+
+func (s *shopPostgresRepo) CheckShopNameExists(shopName string) (bool, error) {
+	var exists bool
+	queryCheckShopNameExists := fmt.Sprintf(`
+		SELECT 
+		EXISTS(
+			SELECT
+				name
+			FROM 
+				%s
+			WHERE 
+				name = $1
+			AND 
+				deleted_at
+			IS NULL
+		);
+			
+		`, shopTableName)
+
+	err := s.db.QueryRow(
+		queryCheckShopNameExists,
+		shopName,
+	).Scan(
+		&exists,
+	)
+
+	if err != nil {
+		return false, err
+	}
+
+	return exists, nil
+}
