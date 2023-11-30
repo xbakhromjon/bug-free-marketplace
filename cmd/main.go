@@ -1,8 +1,7 @@
 package main
 
-type user struct {
-}
+import "golang-project-template/cmd/app"
 
 func main() {
-
+	app.Execute()
 }
