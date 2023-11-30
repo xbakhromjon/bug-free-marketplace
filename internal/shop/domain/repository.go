@@ -2,6 +2,7 @@ package domain
 
 type ShopRepository interface {
 	Save(shop NewShop) (int, error)
+	CheckShopNameExists(string) (bool, error)
 }
 
 type ProductRepository interface {
@@ -12,7 +13,9 @@ type ProductRepository interface {
 
 const (
 	ErrProductNotFound = Err("product not found")
-	ErrInvalidShopName = Err("invalid shop name")
+	ErrEmptyShopName   = Err("shop name can not be empty")
+	ErrInvalidShopName = Err("shop name max length must be 128 characters")
+	ErrShopNameExists  = Err("This shop name already exists")
 )
 
 type Err string

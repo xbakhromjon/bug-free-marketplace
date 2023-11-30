@@ -6,11 +6,23 @@ import (
 )
 
 func (m *mockShopRepo) Save(shop domain.NewShop) (int, error) {
-	if shop.Name == "" {
-		return 0, domain.ErrInvalidShopName
+	if shop.Name == "successful_shop, error" {
+		return 1, nil
+	} else if shop.Name == "" {
+		return 0, domain.ErrEmptyShopName
 	}
 
 	return 1, nil
+}
+
+func (m *mockShopRepo) CheckShopNameExists(shopName string) (bool, error) {
+	existingShopName := "existing_shop"
+
+	if existingShopName == shopName {
+		return true, nil
+	}
+
+	return false, nil
 }
 
 type mockShopRepo struct {
@@ -25,23 +37,48 @@ func TestCreateShop(t *testing.T) {
 	underTest := shopService{repository: newMockShopRepo()}
 
 	t.Run("Create Shop successfully", func(t *testing.T) {
-		got, _ := underTest.Create(domain.NewShop{Name: "Test Shop", OwnerId: 1})
+		got, err := underTest.Create(domain.NewShop{Name: "testing shop name", OwnerId: 1})
 		want := 1
 
-		if got != want {
+		if err != nil {
+			t.Errorf("Error expected to be nil, bot got %v", err)
+		} else if got != want {
 			t.Errorf("want %v, but got %v", want, got)
 		}
 
 	})
-	t.Run("invalid shop name", func(t *testing.T) {
-		wanted := domain.ErrInvalidShopName
 
-		_, err := underTest.Create(domain.NewShop{Name: "", OwnerId: 1})
+	cases := []struct {
+		label     string
+		newShop   domain.NewShop
+		wantedErr domain.Err
+	}{
+		{
+			"empty shop name",
+			domain.NewShop{
+				Name:    "",
+				OwnerId: 1,
+			},
+			domain.ErrEmptyShopName,
+		},
+		{
+			"shop name exists",
+			domain.NewShop{
+				Name:    "existing_shop",
+				OwnerId: 1,
+			},
+			domain.ErrShopNameExists,
+		},
+	}
+	for _, test := range cases {
+		t.Run(test.label, func(t *testing.T) {
+			_, gotErr := underTest.Create(test.newShop)
+			if gotErr == nil {
+				t.Error("Expected error but got nil")
+			} else if gotErr != test.wantedErr {
+				t.Errorf("Expected %v, but got %v", test.wantedErr, gotErr)
+			}
+		})
+	}
 
-		if err == nil {
-			t.Error("Expected an error, but got nil")
-		} else if err != wanted {
-			t.Errorf("Expected error %v, but got %v", wanted, err)
-		}
-	})
 }
