@@ -32,10 +32,15 @@ func newMockShopRepo() domain.ShopRepository {
 
 func TestCreateShop(t *testing.T) {
 
-	underTest := shopService{repository: newMockShopRepo()}
+	underTest := shopService{
+		repository:  newMockShopRepo(),
+		shopFactory: domain.NewShopFactory(20),
+	}
 
 	t.Run("Create Shop successfully", func(t *testing.T) {
-		got, err := underTest.Create(domain.NewShop{Name: "testing shop name", OwnerId: 1})
+		got, err := underTest.Create(
+			domain.NewShop{Name: "testing shop name", OwnerId: 1},
+		)
 		want := 1
 
 		if err != nil {
@@ -66,6 +71,14 @@ func TestCreateShop(t *testing.T) {
 				OwnerId: 1,
 			},
 			domain.ErrShopNameExists,
+		},
+		{
+			"invalid shop name",
+			domain.NewShop{
+				Name:    "shop name that contains more than 20 chars",
+				OwnerId: 1,
+			},
+			domain.ErrInvalidShopName,
 		},
 	}
 	for _, test := range cases {

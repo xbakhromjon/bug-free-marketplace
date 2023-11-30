@@ -9,15 +9,21 @@ type ShopService interface {
 }
 
 type shopService struct {
-	repository domain.ShopRepository
+	repository  domain.ShopRepository
+	shopFactory domain.ShopFactory
 }
 
-func NewShopService(repository domain.ShopRepository) ShopService {
-	return &shopService{repository: repository}
+func NewShopService(
+	repository domain.ShopRepository,
+	shopFactory domain.ShopFactory,
+) ShopService {
+
+	return &shopService{repository: repository, shopFactory: shopFactory}
 }
 
 func (s *shopService) Create(req domain.NewShop) (int, error) {
-	err := ValidateShop(&req)
+
+	err := s.shopFactory.Validate(req)
 
 	if err != nil {
 		return 0, err
@@ -33,17 +39,4 @@ func (s *shopService) Create(req domain.NewShop) (int, error) {
 	}
 
 	return s.repository.Save(req)
-}
-
-func ValidateShop(newShop *domain.NewShop) error {
-
-	if newShop.Name == "" {
-		return domain.ErrEmptyShopName
-	}
-
-	if len(newShop.Name) > 128 {
-		return domain.ErrInvalidShopName
-	}
-
-	return nil
 }
