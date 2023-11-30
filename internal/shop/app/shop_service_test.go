@@ -6,9 +6,7 @@ import (
 )
 
 func (m *mockShopRepo) Save(shop domain.NewShop) (int, error) {
-	if shop.Name == "successful_shop, error" {
-		return 1, nil
-	} else if shop.Name == "" {
+	if shop.Name == "" {
 		return 0, domain.ErrEmptyShopName
 	}
 

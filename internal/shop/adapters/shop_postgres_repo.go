@@ -78,35 +78,3 @@ func (s *shopPostgresRepo) CheckShopNameExists(shopName string) (bool, error) {
 
 	return exists, nil
 }
-
-func (s *shopPostgresRepo) CheckUserExists(ownerId int) (bool, error) {
-	var exists bool
-	queryCheckUserExists := fmt.Sprintf(`
-		SELECT 
-		EXISTS(
-			SELECT
-				phone_number
-			FROM 
-				%s
-			WHERE 
-				id = $1
-			AND
-				deleted_at 
-			IS NULL
-		);
-			
-		`, "users")
-
-	err := s.db.QueryRow(
-		queryCheckUserExists,
-		ownerId,
-	).Scan(
-		&exists,
-	)
-
-	if err != nil {
-		return false, err
-	}
-
-	return exists, nil
-}
