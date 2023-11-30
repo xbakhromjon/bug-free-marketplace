@@ -2,7 +2,10 @@ module golang-project-template
 
 go 1.21.1
 
-require github.com/spf13/cobra v1.8.0
+require (
+	github.com/spf13/cobra v1.8.0
+	golang.org/x/crypto v0.16.0
+)
 
 require (
 	github.com/Masterminds/squirrel v1.5.4 // indirect
