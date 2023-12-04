@@ -53,3 +53,5 @@ func (f UserFactory) ParseModelToDomain(
 		deletedAt:   deletedAt, //
 	}
 }
+
+//
