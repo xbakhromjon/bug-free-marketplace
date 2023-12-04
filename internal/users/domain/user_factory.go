@@ -50,6 +50,6 @@ func (f UserFactory) ParseModelToDomain(
 		role:        role,
 		createAt:    createdAt,
 		updatedAt:   updatedAt,
-		deletedAt:   deletedAt,
+		deletedAt:   deletedAt, //
 	}
 }
