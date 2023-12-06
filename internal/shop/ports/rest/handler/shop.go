@@ -22,10 +22,7 @@ func (h *ShopHandler) CreateShop(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newShopId, err := h.ShopService.Create(domain.NewShop{
-		Name:    newShop.Name,
-		OwnerId: newShop.OwnerId,
-	})
+	newShopId, err := h.ShopService.Create(newShop)
 	if err != nil {
 		log.Printf("Error creating a new shop:  %v", err)
 		http.Error(w, "Failed to create shop", http.StatusInternalServerError)

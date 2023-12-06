@@ -17,7 +17,11 @@ import (
 
 func main() {
 	// app.Execute()
+	httpServer()
 
+}
+
+func httpServer() *chi.Mux {
 	db, err := common.ConnectToDb(
 		os.Getenv("POSTGRES_HOST"),
 		os.Getenv("POSTGRES_PORT"),
@@ -32,21 +36,15 @@ func main() {
 
 	defer db.Close()
 
-	router := createRouter(db)
+	router := chi.NewRouter()
+	router.Use(middleware.Logger)
 
-	server := &http.Server{Addr: os.Getenv("RPC_PORT"), Handler: router}
+	server := &http.Server{Addr: os.Getenv("HTTP_PORT"), Handler: router}
 	if err := server.ListenAndServe(); err != http.ErrServerClosed {
 		panic(err)
 	}
 	defer server.Close()
 	log.Println("Starting server...")
-
-}
-
-func createRouter(db *pgx.Conn) *chi.Mux {
-
-	router := chi.NewRouter()
-	router.Use(middleware.Logger)
 
 	//Testing router
 	router.Get("/", func(w http.ResponseWriter, _ *http.Request) {
