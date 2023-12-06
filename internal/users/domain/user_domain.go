@@ -20,7 +20,6 @@ type NewUser struct {
 	name        string
 	phoneNumber string
 	password    string
-	role        string
 }
 
 // User
@@ -56,24 +55,9 @@ func (u *User) GetDeletedAt() time.Time {
 	return *u.deletedAt
 }
 
-// NewUser
-func (n *NewUser) GetName() string {
-	return n.name
-}
-
-func (n *NewUser) GetPhoneNumber() string {
-	return n.phoneNumber
-}
-
-func (n *NewUser) GetPassword() string {
-	return n.password
-}
-
-func (n *NewUser) GetRole() string {
-	return n.role
-}
-
 type UserRepository interface {
 	Save(user *User) (int, error)
 	FindOneByPhoneNumber(phoneNumber string) (*User, error)
+	FindByID(userID int) (*User, error)
+	UserExists(userID int) (bool, error)
 }
