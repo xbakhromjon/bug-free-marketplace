@@ -9,6 +9,6 @@ type Shop struct {
 }
 
 type NewShop struct {
-	Name   string
-	OwnerId int
+	Name    string `json:"name"`
+	OwnerId int    `json:"owner_id"`
 }
