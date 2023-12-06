@@ -58,12 +58,24 @@ func createRouter(db *pgx.Conn) *chi.Mux {
 
 	// Shop router
 	shopRepo := adapters.NewShopRepository(db)
+	userRepo := mockUserRepo{db: db}
 	shopFactory := domain.NewShopFactory(256)
-	shopService := service.NewShopService(shopRepo, shopFactory)
+	shopService := service.NewShopService(shopRepo, shopFactory, userRepo)
 	shopHandler := shophandler.ShopHandler{ShopService: shopService}
 	router.Route("/shop", func(r chi.Router) {
 		r.Post("/", shopHandler.CreateShop)
 	})
 
 	return router
+}
+
+type mockUserRepo struct {
+	db *pgx.Conn
+}
+
+func (u mockUserRepo) UserExists(id int) (bool, error) {
+	if id == 99 {
+		return false, domain.ErrUserNotExists
+	}
+	return true, nil
 }

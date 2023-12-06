@@ -30,11 +30,22 @@ func newMockShopRepo() domain.ShopRepository {
 	return &mockShopRepo{}
 }
 
+type mockUserRepo struct {
+}
+
+func (u mockUserRepo) UserExists(id int) (bool, error) {
+	if id == 99 {
+		return false, domain.ErrUserNotExists
+	}
+	return true, nil
+}
+
 func TestCreateShop(t *testing.T) {
 
 	underTest := shopService{
-		repository:  newMockShopRepo(),
-		shopFactory: domain.NewShopFactory(20),
+		repository:     newMockShopRepo(),
+		shopFactory:    domain.NewShopFactory(20),
+		userRepository: mockUserRepo{},
 	}
 
 	t.Run("Create Shop successfully", func(t *testing.T) {
@@ -42,7 +53,6 @@ func TestCreateShop(t *testing.T) {
 			domain.NewShop{Name: "testing shop name", OwnerId: 1},
 		)
 		want := 1
-
 		if err != nil {
 			t.Errorf("Error expected to be nil, bot got %v", err)
 		} else if got != want {
@@ -80,6 +90,14 @@ func TestCreateShop(t *testing.T) {
 			},
 			domain.ErrInvalidShopName,
 		},
+		{
+			"no such user",
+			domain.NewShop{
+				Name:    "random shop name",
+				OwnerId: 99,
+			},
+			domain.ErrUserNotExists,
+		},
 	}
 	for _, test := range cases {
 		t.Run(test.label, func(t *testing.T) {
@@ -91,5 +109,4 @@ func TestCreateShop(t *testing.T) {
 			}
 		})
 	}
-
 }
