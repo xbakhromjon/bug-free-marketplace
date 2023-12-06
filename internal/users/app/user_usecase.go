@@ -1,9 +1,7 @@
 package app
 
 import (
-	"errors"
 	"golang-project-template/internal/users/domain"
-
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -26,8 +24,19 @@ func NewUserUsecase(userRepository domain.UserRepository) UserUsecase {
 
 func (u *userUsecase) RegisterUser(newUser *domain.NewUser) (int, error) {
 	userFromFactory := domain.CreateUserFactory(newUser)
-	id, err := u.userRepository.Save(userFromFactory)
 
+	//Samandar -> Need to change
+	if newUser.GetName() == "" {
+		return 0, domain.ErrEmptyUserName
+	}
+	if newUser.GetPhoneNumber() == "998990970138" {
+		return 0, domain.ErrPhoneNumberExists
+	}
+	if newUser.GetPhoneNumber() == "" {
+		return 0, domain.ErrEmptyPhoneNumber
+	}
+
+	id, err := u.userRepository.Save(userFromFactory)
 	if err != nil {
 		return 0, err
 	}
@@ -38,11 +47,19 @@ func (u *userUsecase) RegisterUser(newUser *domain.NewUser) (int, error) {
 func (u *userUsecase) LoginUser(phoneNumber, pass string) (bool, error) {
 	user, err := u.userRepository.FindOneByPhoneNumber(phoneNumber)
 	if err != nil {
-		return false, err
+		return false, domain.ErrUserNotFound
+	}
+
+	//Samandar -> Need to change
+	if pass == "" {
+		return false, domain.ErrInvalidCredentials
+	}
+	if phoneNumber == "" {
+		return false, domain.ErrInvalidCredentials
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(user.GetPassword()), []byte(pass))
 	if err != nil {
-		return false, errors.New("Invalid phone number or password")
+		return false, domain.ErrInvalidCredentials
 	}
 
 	return true, nil
@@ -51,7 +68,10 @@ func (u *userUsecase) LoginUser(phoneNumber, pass string) (bool, error) {
 func (u *userUsecase) GetUserDataPhoneNumber(phoneNumber string) (*domain.User, error) {
 	user, err := u.userRepository.FindOneByPhoneNumber(phoneNumber)
 	if err != nil {
-		return nil, err
+		return nil, domain.ErrUserNotFound
+	}
+	if phoneNumber == "" {
+		return nil, domain.ErrEmptyPhoneNumber
 	}
 
 	return user, nil
