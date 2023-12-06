@@ -103,3 +103,18 @@ func (u *userRepository) FindByID(userID int) (*domain.User, error) {
 
 	return newUser, nil
 }
+
+func (u *userRepository) UserExists(userID int) (bool, error) {
+	var exists bool
+	sqlStatement := `
+	SELECT 1
+	FROM users
+	where id = $1
+	`
+	err := u.db.QueryRow(sqlStatement, userID).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+
+	return exists, nil
+}
