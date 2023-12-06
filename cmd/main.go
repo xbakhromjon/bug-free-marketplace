@@ -62,8 +62,14 @@ func createRouter(db *pgx.Conn) *chi.Mux {
 	shopFactory := domain.NewShopFactory(256)
 	shopService := service.NewShopService(shopRepo, shopFactory, userRepo)
 	shopHandler := shophandler.ShopHandler{ShopService: shopService}
-	router.Route("/shop", func(r chi.Router) {
-		r.Post("/", shopHandler.CreateShop)
+
+	// Routers
+	router.Route("/api", func(r chi.Router) {
+
+		r.Route("/shop", func(r chi.Router) {
+			r.Post("/", shopHandler.CreateShop)
+		})
+
 	})
 
 	return router

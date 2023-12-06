@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"golang-project-template/internal/shop/app"
 	"golang-project-template/internal/shop/domain"
 	"log"
@@ -33,10 +32,11 @@ func (h *ShopHandler) CreateShop(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, err := json.Marshal(struct {
-		Id int
-	}{newShopId})
+	resdata := map[string]int{"Id": newShopId}
+	jsonData, err := json.Marshal(resdata)
 
-	fmt.Fprint(w, res)
+	w.WriteHeader(http.StatusCreated)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonData)
 
 }
