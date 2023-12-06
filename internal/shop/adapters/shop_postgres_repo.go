@@ -1,9 +1,10 @@
 package adapters
 
 import (
-	"database/sql"
 	"fmt"
 	"golang-project-template/internal/shop/domain"
+
+	"github.com/jackc/pgx"
 )
 
 var (
@@ -11,10 +12,10 @@ var (
 )
 
 type shopPostgresRepo struct {
-	db *sql.DB
+	db *pgx.Conn
 }
 
-func NewShopRepository(db *sql.DB) domain.ShopRepository {
+func NewShopRepository(db *pgx.Conn) domain.ShopRepository {
 	return &shopPostgresRepo{db: db}
 }
 

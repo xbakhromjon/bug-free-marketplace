@@ -5,6 +5,10 @@ type ShopRepository interface {
 	CheckShopNameExists(string) (bool, error)
 }
 
+type UserRepo interface {
+	UserExists(id int) (bool, error)
+}
+
 type ProductRepository interface {
 	Save(product *Product) (int, error)
 	FindById(id int) (*Product, error)
@@ -16,6 +20,7 @@ const (
 	ErrEmptyShopName   = Err("shop name can not be empty")
 	ErrInvalidShopName = Err("shop name max length must be 128 characters")
 	ErrShopNameExists  = Err("This shop name already exists")
+	ErrUserNotExists   = Err("No such user")
 )
 
 type Err string

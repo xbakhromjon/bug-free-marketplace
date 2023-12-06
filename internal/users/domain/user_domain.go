@@ -20,7 +20,6 @@ type NewUser struct {
 	name        string
 	phoneNumber string
 	password    string
-	role        string
 }
 
 // User-getter
@@ -102,10 +101,6 @@ func (n *NewUser) GetPassword() string {
 	return n.password
 }
 
-func (n *NewUser) GetRole() string {
-	return n.role
-}
-
 func (u *NewUser) SetName(name string) {
 	u.name = name
 }
@@ -118,11 +113,9 @@ func (u *NewUser) SetPassword(password string) {
 	u.password = password
 }
 
-func (u *NewUser) SetRole(role string) {
-	u.role = role
-}
-
 type UserRepository interface {
 	Save(user *User) (int, error)
 	FindOneByPhoneNumber(phoneNumber string) (*User, error)
+	FindByID(userID int) (*User, error)
+	UserExists(userID int) (bool, error)
 }
