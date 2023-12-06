@@ -4,34 +4,52 @@ import "time"
 
 type UserFactory struct{}
 
+func NewUserFactory() *UserFactory {
+	return &UserFactory{}
+}
+
+func (f UserFactory) CreateMerchantUser(user *NewUser) *User {
+	return &User{
+		name:        user.name,
+		phoneNumber: user.phoneNumber,
+		password:    user.phoneNumber,
+		role:        "merchant",
+		createAt:    time.Now().UTC(),
+		updatedAt:   time.Now().UTC(),
+		deletedAt:   nil,
+	}
+}
+
+func (f UserFactory) CreateCustomerUser(user *NewUser) *User {
+	return &User{
+		name:        user.name,
+		phoneNumber: user.phoneNumber,
+		password:    user.phoneNumber,
+		role:        "customer",
+		createAt:    time.Now().UTC(),
+		updatedAt:   time.Now().UTC(),
+		deletedAt:   nil,
+	}
+}
+
 func (f UserFactory) ParseModelToDomain(
 	id int,
 	name,
 	phoneNumber,
 	password,
 	role string,
-	createAt time.Time,
+	createdAt time.Time,
+	updatedAt time.Time,
+	deletedAt *time.Time,
 ) *User {
 	return &User{
 		id:          id,
 		name:        name,
 		phoneNumber: phoneNumber,
 		password:    password,
-		role:        "user",
-		createAt:    time.Now().UTC(),
-	}
-}
-
-func CreateUserFactory(newUser *NewUser) *User {
-	currentTime := time.Now()
-	return &User{
-		name:        newUser.GetName(),
-		phoneNumber: newUser.GetPhoneNumber(),
-		password:    newUser.GetPassword(),
-		role:        newUser.GetRole(),
-		createAt:    currentTime,
-		updatedAt:   currentTime,
-
-		deletedAt: nil,
+		role:        role,
+		createAt:    createdAt,
+		updatedAt:   updatedAt,
+		deletedAt:   deletedAt,
 	}
 }
