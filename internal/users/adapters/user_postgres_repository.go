@@ -64,7 +64,7 @@ func (u *userRepository) FindOneByPhoneNumber(phone_number string) (*domain.User
 		return nil, err
 	}
 
-	newUser := u.f.ParseModelToDomain(id, name, phoneNumber, password, role, createdAt)
+	newUser := u.f.ParseModelToDomain(id, name, phoneNumber, password, role, createdAt, updatedAt, deletedAt)
 
 	return newUser, nil
 }

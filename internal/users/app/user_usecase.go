@@ -13,7 +13,8 @@ type userUsecase struct {
 }
 
 type UserUsecase interface {
-	RegisterUser(user *domain.NewUser) (int, error)
+	RegisterMerchantUser(user *domain.NewUser) (int, error)
+	RegisterCustomer(user *domain.NewUser) (int, error)
 	LoginUser(phoneNumber, pass string) (bool, error)
 	GetUserDataPhoneNumber(phoneNumber string) (*domain.User, error)
 }
@@ -24,8 +25,19 @@ func NewUserUsecase(userRepository domain.UserRepository) UserUsecase {
 	}
 }
 
-func (u *userUsecase) RegisterUser(newUser *domain.NewUser) (int, error) {
-	userFromFactory := domain.CreateUserFactory(newUser)
+func (u *userUsecase) RegisterMerchantUser(newUser *domain.NewUser) (int, error) {
+	userFromFactory := u.f.CreateMerchantUser(newUser)
+	id, err := u.userRepository.Save(userFromFactory)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return id, nil
+}
+
+func (u *userUsecase) RegisterCustomer(newUser *domain.NewUser) (int, error) {
+	userFromFactory := u.f.CreateCustomerUser(newUser)
 	id, err := u.userRepository.Save(userFromFactory)
 
 	if err != nil {
