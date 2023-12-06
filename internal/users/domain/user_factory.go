@@ -17,7 +17,7 @@ func (f UserFactory) ParseModelToDomain(
 		name:        name,
 		phoneNumber: phoneNumber,
 		password:    password,
-		role:        role,
+		role:        "user",
 		createAt:    time.Now().UTC(),
 	}
 }

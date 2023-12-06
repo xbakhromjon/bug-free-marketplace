@@ -76,4 +76,5 @@ func (n *NewUser) GetRole() string {
 type UserRepository interface {
 	Save(user *User) (int, error)
 	FindOneByPhoneNumber(phoneNumber string) (*User, error)
+	FindByID(userID int) (*User, error)
 }

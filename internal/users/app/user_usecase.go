@@ -16,6 +16,7 @@ type UserUsecase interface {
 	RegisterUser(user *domain.NewUser) (int, error)
 	LoginUser(phoneNumber, pass string) (bool, error)
 	GetUserDataPhoneNumber(phoneNumber string) (*domain.User, error)
+	GetUserByID(id int) (*domain.User, error)
 }
 
 func NewUserUsecase(userRepository domain.UserRepository) UserUsecase {
@@ -50,6 +51,15 @@ func (u *userUsecase) LoginUser(phoneNumber, pass string) (bool, error) {
 
 func (u *userUsecase) GetUserDataPhoneNumber(phoneNumber string) (*domain.User, error) {
 	user, err := u.userRepository.FindOneByPhoneNumber(phoneNumber)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func (u *userUsecase) GetUserByID(id int) (*domain.User, error) {
+	user, err := u.userRepository.FindByID(id)
 	if err != nil {
 		return nil, err
 	}
