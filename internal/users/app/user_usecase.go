@@ -2,7 +2,6 @@ package app
 
 import (
 	"golang-project-template/internal/users/domain"
-	"golang.org/x/crypto/bcrypt"
 	"strings"
 )
 
@@ -29,7 +28,7 @@ func NewUserUsecase(userRepository domain.UserRepository) UserUsecase {
 
 func (u *userUsecase) RegisterMerchantUser(newUser *domain.NewUser) (int, error) {
 	userFromFactory := u.f.CreateMerchantUser(newUser)
-	err := validateUserInfo(userFromFactory)
+	err := validateUserInfoForRegister(userFromFactory.GetName(), userFromFactory.GetPhoneNumber(), userFromFactory.GetPassword())
 	if err != nil {
 		return 0, err
 	}
@@ -44,7 +43,11 @@ func (u *userUsecase) RegisterMerchantUser(newUser *domain.NewUser) (int, error)
 
 func (u *userUsecase) RegisterCustomer(newUser *domain.NewUser) (int, error) {
 	userFromFactory := u.f.CreateCustomerUser(newUser)
-	err := validateUserInfo(userFromFactory)
+
+	err := validateUserInfoForRegister(
+		userFromFactory.GetName(),
+		userFromFactory.GetPhoneNumber(),
+		userFromFactory.GetPassword())
 	if err != nil {
 		return 0, err
 	}
@@ -59,7 +62,10 @@ func (u *userUsecase) RegisterCustomer(newUser *domain.NewUser) (int, error) {
 
 func (u *userUsecase) RegisterAdmin(newUser *domain.NewUser) (int, error) {
 	userFromFactory := u.f.CreateAdminUser(newUser)
-	err := validateUserInfo(userFromFactory)
+	err := validateUserInfoForRegister(
+		userFromFactory.GetName(),
+		userFromFactory.GetPhoneNumber(),
+		userFromFactory.GetPassword())
 	if err != nil {
 		return 0, err
 	}
@@ -73,33 +79,29 @@ func (u *userUsecase) RegisterAdmin(newUser *domain.NewUser) (int, error) {
 }
 
 func (u *userUsecase) LoginUser(phoneNumber, pass string) (bool, error) {
-	user, err := u.userRepository.FindOneByPhoneNumber(phoneNumber)
+
+	err := validateUserInfoForLogin(phoneNumber, pass)
 	if err != nil {
-		return false, domain.ErrUserNotFound
+		return false, err
 	}
 
-	if strings.TrimSpace(pass) == "" {
-		return false, domain.ErrEmptyUserName
-	}
-	if strings.TrimSpace(phoneNumber) == "" {
-		return false, domain.ErrInvalidCredentials
-	}
-	err = bcrypt.CompareHashAndPassword([]byte(user.GetPassword()), []byte(pass))
-	if err != nil {
-		return false, domain.ErrInvalidCredentials
+	ok, err := u.userRepository.UserExistByPhone(phoneNumber)
+	if !ok || err != nil {
+		return false, domain.ErrUserNotFound
 	}
 
 	return true, nil
 }
 
 func (u *userUsecase) GetUserDataPhoneNumber(phoneNumber string) (*domain.User, error) {
+
+	if strings.TrimSpace(phoneNumber) == "" {
+		return nil, domain.ErrEmptyPhoneNumber
+	}
+
 	user, err := u.userRepository.FindOneByPhoneNumber(phoneNumber)
 	if err != nil {
 		return nil, domain.ErrUserNotFound
-	}
-
-	if strings.TrimSpace(phoneNumber) == "" {
-		return nil, domain.ErrInvalidCredentials
 	}
 
 	return user, nil

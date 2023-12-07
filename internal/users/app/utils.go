@@ -27,16 +27,28 @@ func validatePassword(password string) error {
 	return nil
 }
 
-func validateUserInfo(user *domain.User) error {
+func validateUserInfoForRegister(name, phoneNumber, password string) error {
 
-	if strings.TrimSpace(user.GetName()) == "" {
+	if strings.TrimSpace(name) == "" {
 		return domain.ErrEmptyUserName
 	}
-	if strings.TrimSpace(user.GetPhoneNumber()) == "" {
+	if strings.TrimSpace(phoneNumber) == "" {
 		return domain.ErrEmptyPhoneNumber
 	}
-	if validatePassword(user.GetPassword()) == domain.ErrInvalidPassword {
+	if validatePassword(password) == domain.ErrInvalidPassword {
 		return domain.ErrInvalidPassword
+	}
+
+	return nil
+}
+
+func validateUserInfoForLogin(phoneNumber, password string) error {
+
+	if strings.TrimSpace(phoneNumber) == "" {
+		return domain.ErrInvalidCredentials
+	}
+	if validatePassword(password) == domain.ErrInvalidPassword {
+		return domain.ErrInvalidCredentials
 	}
 
 	return nil

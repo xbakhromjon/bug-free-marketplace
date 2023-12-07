@@ -118,3 +118,20 @@ func (u *userRepository) UserExists(userID int) (bool, error) {
 
 	return exists, nil
 }
+
+func (u *userRepository) UserExistByPhone(phone string) (bool, error) {
+	var exists bool
+	query := `
+		SELECT EXISTS (
+			SELECT 1
+			FROM users
+			WHERE phone_number = $1
+		)
+	`
+	err := u.db.QueryRow(query, phone).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+
+	return exists, nil
+}
