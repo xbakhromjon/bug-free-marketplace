@@ -3,6 +3,7 @@ package app
 import (
 	"golang-project-template/internal/users/domain"
 	"golang.org/x/crypto/bcrypt"
+	"strings"
 )
 
 type userUsecase struct {
@@ -13,6 +14,7 @@ type userUsecase struct {
 type UserUsecase interface {
 	RegisterMerchantUser(user *domain.NewUser) (int, error)
 	RegisterCustomer(user *domain.NewUser) (int, error)
+	RegisterAdmin(user *domain.NewUser) (int, error)
 	LoginUser(phoneNumber, pass string) (bool, error)
 	GetUserDataPhoneNumber(phoneNumber string) (*domain.User, error)
 	GetUserByID(id int) (*domain.User, error)
@@ -27,8 +29,12 @@ func NewUserUsecase(userRepository domain.UserRepository) UserUsecase {
 
 func (u *userUsecase) RegisterMerchantUser(newUser *domain.NewUser) (int, error) {
 	userFromFactory := u.f.CreateMerchantUser(newUser)
-	id, err := u.userRepository.Save(userFromFactory)
+	err := validateUserInfo(userFromFactory)
+	if err != nil {
+		return 0, err
+	}
 
+	id, err := u.userRepository.Save(userFromFactory)
 	if err != nil {
 		return 0, err
 	}
@@ -38,17 +44,29 @@ func (u *userUsecase) RegisterMerchantUser(newUser *domain.NewUser) (int, error)
 
 func (u *userUsecase) RegisterCustomer(newUser *domain.NewUser) (int, error) {
 	userFromFactory := u.f.CreateCustomerUser(newUser)
+	err := validateUserInfo(userFromFactory)
+	if err != nil {
+		return 0, err
+	}
+
 	id, err := u.userRepository.Save(userFromFactory)
 	if err != nil {
 		return 0, err
 	}
 
-	//Samandar -> Need to change
-	if newUser.GetName() == "" {
-		return 0, domain.ErrEmptyUserName
+	return id, nil
+}
+
+func (u *userUsecase) RegisterAdmin(newUser *domain.NewUser) (int, error) {
+	userFromFactory := u.f.CreateAdminUser(newUser)
+	err := validateUserInfo(userFromFactory)
+	if err != nil {
+		return 0, err
 	}
-	if newUser.GetPhoneNumber() == "" {
-		return 0, domain.ErrEmptyPhoneNumber
+
+	id, err := u.userRepository.Save(userFromFactory)
+	if err != nil {
+		return 0, err
 	}
 
 	return id, nil
@@ -60,11 +78,10 @@ func (u *userUsecase) LoginUser(phoneNumber, pass string) (bool, error) {
 		return false, domain.ErrUserNotFound
 	}
 
-	//Samandar -> Need to change
-	if pass == "" {
-		return false, domain.ErrInvalidCredentials
+	if strings.TrimSpace(pass) == "" {
+		return false, domain.ErrEmptyUserName
 	}
-	if phoneNumber == "" {
+	if strings.TrimSpace(phoneNumber) == "" {
 		return false, domain.ErrInvalidCredentials
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(user.GetPassword()), []byte(pass))
@@ -80,8 +97,9 @@ func (u *userUsecase) GetUserDataPhoneNumber(phoneNumber string) (*domain.User, 
 	if err != nil {
 		return nil, domain.ErrUserNotFound
 	}
-	if phoneNumber == "" {
-		return nil, domain.ErrEmptyPhoneNumber
+
+	if strings.TrimSpace(phoneNumber) == "" {
+		return nil, domain.ErrInvalidCredentials
 	}
 
 	return user, nil

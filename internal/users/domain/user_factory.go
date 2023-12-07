@@ -12,7 +12,7 @@ func (f UserFactory) CreateMerchantUser(user *NewUser) *User {
 	return &User{
 		name:        user.name,
 		phoneNumber: user.phoneNumber,
-		password:    user.phoneNumber,
+		password:    user.password,
 		role:        "merchant",
 		createAt:    time.Now().UTC(),
 		updatedAt:   time.Now().UTC(),
@@ -24,8 +24,20 @@ func (f UserFactory) CreateCustomerUser(user *NewUser) *User {
 	return &User{
 		name:        user.name,
 		phoneNumber: user.phoneNumber,
-		password:    user.phoneNumber,
+		password:    user.password,
 		role:        "user",
+		createAt:    time.Now().UTC(),
+		updatedAt:   time.Now().UTC(),
+		deletedAt:   nil,
+	}
+}
+
+func (f UserFactory) CreateAdminUser(user *NewUser) *User {
+	return &User{
+		name:        user.name,
+		phoneNumber: user.phoneNumber,
+		password:    user.password,
+		role:        "admin",
 		createAt:    time.Now().UTC(),
 		updatedAt:   time.Now().UTC(),
 		deletedAt:   nil,
@@ -59,8 +71,8 @@ const (
 	ErrEmptyUserName      = Err("user name can not be empty")
 	ErrEmptyPhoneNumber   = Err("phone number can not be empty")
 	ErrInvalidCredentials = Err("bad credentials")
-	//ErrInvalidName   = Err("shop name max length must be 128 characters")
-	ErrPhoneNumberExists = Err("this phone number already exists")
+	ErrPhoneNumberExists  = Err("this phone number already exists")
+	ErrInvalidPassword    = Err("invalid password")
 )
 
 type Err string
