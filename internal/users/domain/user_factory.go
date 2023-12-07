@@ -59,9 +59,8 @@ const (
 	ErrEmptyUserName      = Err("user name can not be empty")
 	ErrEmptyPhoneNumber   = Err("phone number can not be empty")
 	ErrInvalidCredentials = Err("bad credentials")
-
 	//ErrInvalidName   = Err("shop name max length must be 128 characters")
-	ErrPhoneNumberExists = Err("This phone number already exists")
+	ErrPhoneNumberExists = Err("this phone number already exists")
 )
 
 type Err string

@@ -7,13 +7,12 @@ import (
 	"time"
 )
 
-func TestRegisterUser(t *testing.T) {
+func TestRegisterCustomer(t *testing.T) {
 	underTest := userUsecase{userRepository: &mockUserRepo{}}
 
 	t.Run("success register user", func(t *testing.T) {
 		user := mockUserForTestRegister()
-		user.SetPhoneNumber("phone")
-		got, err := underTest.RegisterUser(user)
+		got, err := underTest.RegisterCustomer(user)
 		want := 1
 
 		assertEqual[int](t, got, want)
@@ -27,7 +26,7 @@ func TestRegisterUser(t *testing.T) {
 	}{
 		{
 			name:          "failed to register user (existing phone number)",
-			user:          mockUserForTestRegister(),
+			user:          mockUserWithPhoneForTestRegister("phone"),
 			expectedError: domain.ErrPhoneNumberExists,
 		},
 		{
@@ -37,14 +36,14 @@ func TestRegisterUser(t *testing.T) {
 		},
 		{
 			name:          "failed to register user (empty phone)",
-			user:          mockEmptyPhoneUserForTestRegister(),
+			user:          mockUserWithPhoneForTestRegister(""),
 			expectedError: domain.ErrEmptyPhoneNumber,
 		},
 	}
 
 	for _, tCase := range testCases {
 		t.Run(tCase.name, func(t *testing.T) {
-			_, err := underTest.RegisterUser(tCase.user)
+			_, err := underTest.RegisterCustomer(tCase.user)
 
 			assertEqual[error](t, err, tCase.expectedError)
 		})
@@ -151,7 +150,6 @@ func mockUserForTestRegister() *domain.NewUser {
 	newUser.SetName("Quvonchbek")
 	newUser.SetPhoneNumber("998990970138")
 	newUser.SetPassword("golang")
-	newUser.SetRole("user")
 
 	return newUser
 }
@@ -161,17 +159,15 @@ func mockEmptyNameUserForTestRegister() *domain.NewUser {
 	newUser.SetName("")
 	newUser.SetPhoneNumber("998990970138")
 	newUser.SetPassword("golang")
-	newUser.SetRole("user")
 
 	return newUser
 }
 
-func mockEmptyPhoneUserForTestRegister() *domain.NewUser {
+func mockUserWithPhoneForTestRegister(phone string) *domain.NewUser {
 	newUser := &domain.NewUser{}
 	newUser.SetName("Quvonchbek")
-	newUser.SetPhoneNumber("")
+	newUser.SetPhoneNumber(phone)
 	newUser.SetPassword("golang")
-	newUser.SetRole("user")
 
 	return newUser
 }
@@ -197,6 +193,9 @@ func newMockUserRepo() domain.UserRepository {
 }
 
 func (m *mockUserRepo) Save(user *domain.User) (int, error) {
+	if user.GetPhoneNumber() == "phone" {
+		return 0, domain.ErrPhoneNumberExists
+	}
 	return 1, nil
 }
 
@@ -208,4 +207,14 @@ func (m *mockUserRepo) FindOneByPhoneNumber(phoneNumber string) (*domain.User, e
 
 	u = createUserWithPhoneNumber(phoneNumber)
 	return u, nil
+}
+
+func (m *mockUserRepo) FindByID(userID int) (*domain.User, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *mockUserRepo) UserExists(userID int) (bool, error) {
+	//TODO implement me
+	panic("implement me")
 }

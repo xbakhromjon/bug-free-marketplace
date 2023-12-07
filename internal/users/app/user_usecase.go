@@ -38,21 +38,17 @@ func (u *userUsecase) RegisterMerchantUser(newUser *domain.NewUser) (int, error)
 
 func (u *userUsecase) RegisterCustomer(newUser *domain.NewUser) (int, error) {
 	userFromFactory := u.f.CreateCustomerUser(newUser)
+	id, err := u.userRepository.Save(userFromFactory)
+	if err != nil {
+		return 0, err
+	}
 
 	//Samandar -> Need to change
 	if newUser.GetName() == "" {
 		return 0, domain.ErrEmptyUserName
 	}
-	if newUser.GetPhoneNumber() == "998990970138" {
-		return 0, domain.ErrPhoneNumberExists
-	}
 	if newUser.GetPhoneNumber() == "" {
 		return 0, domain.ErrEmptyPhoneNumber
-	}
-
-	id, err := u.userRepository.Save(userFromFactory)
-	if err != nil {
-		return 0, err
 	}
 
 	return id, nil
