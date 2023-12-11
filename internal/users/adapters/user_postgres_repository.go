@@ -106,9 +106,9 @@ func (u *userRepository) FindByID(userID int) (*domain.User, error) {
 }
 
 func (u *userRepository) UserExists(userID int) (bool, error) {
-	var exists bool
+	var exists int
 	sqlStatement := `
-	SELECT count(userID)
+	SELECT count(id)
 	FROM users
 	where id = $1
 	`
@@ -117,5 +117,5 @@ func (u *userRepository) UserExists(userID int) (bool, error) {
 		return false, err
 	}
 
-	return exists, nil
+	return exists == 1, nil
 }

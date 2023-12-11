@@ -39,13 +39,6 @@ func httpServer() *chi.Mux {
 	router := chi.NewRouter()
 	router.Use(middleware.Logger)
 
-	server := &http.Server{Addr: os.Getenv("HTTP_PORT"), Handler: router}
-	if err := server.ListenAndServe(); err != http.ErrServerClosed {
-		panic(err)
-	}
-	defer server.Close()
-	log.Println("Starting server...")
-
 	//Testing router
 	router.Get("/", func(w http.ResponseWriter, _ *http.Request) {
 		w.Write([]byte("Hello, Chi!"))
@@ -69,6 +62,13 @@ func httpServer() *chi.Mux {
 		})
 
 	})
+
+	server := &http.Server{Addr: os.Getenv("HTTP_PORT"), Handler: router}
+	log.Println("Starting server...")
+	if err := server.ListenAndServe(); err != http.ErrServerClosed {
+		panic(err)
+	}
+	defer server.Close()
 
 	return router
 }
