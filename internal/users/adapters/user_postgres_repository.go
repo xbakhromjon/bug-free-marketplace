@@ -1,18 +1,19 @@
 package adapters
 
 import (
-	"database/sql"
 	"golang-project-template/internal/users/domain"
 	"log"
 	"time"
+
+	"github.com/jackc/pgx"
 )
 
 type userRepository struct {
-	db *sql.DB
+	db *pgx.Conn
 	f  domain.UserFactory
 }
 
-func NewUserRepository(db *sql.DB) *userRepository {
+func NewUserRepository(db *pgx.Conn) *userRepository {
 	return &userRepository{db: db}
 }
 

@@ -2,17 +2,17 @@ package main
 
 import (
 	"golang-project-template/internal/common"
-	"golang-project-template/internal/shop/adapters"
+	shopAdapters "golang-project-template/internal/shop/adapters"
 	service "golang-project-template/internal/shop/app"
 	"golang-project-template/internal/shop/domain"
 	shophandler "golang-project-template/internal/shop/ports/rest/handler"
+	userAdapters "golang-project-template/internal/users/adapters"
 	"log"
 	"net/http"
 	"os"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-	"github.com/jackc/pgx"
 )
 
 func main() {
@@ -55,8 +55,8 @@ func httpServer() *chi.Mux {
 	// ...
 
 	// Shop router
-	shopRepo := adapters.NewShopRepository(db)
-	userRepo := mockUserRepo{db: db}
+	shopRepo := shopAdapters.NewShopRepository(db)
+	userRepo := userAdapters.NewUserRepository(db)
 	shopFactory := domain.NewShopFactory(256)
 	shopService := service.NewShopService(shopRepo, shopFactory, userRepo)
 	shopHandler := shophandler.ShopHandler{ShopService: shopService}
@@ -71,15 +71,4 @@ func httpServer() *chi.Mux {
 	})
 
 	return router
-}
-
-type mockUserRepo struct {
-	db *pgx.Conn
-}
-
-func (u mockUserRepo) UserExists(id int) (bool, error) {
-	if id == 99 {
-		return false, domain.ErrUserNotExists
-	}
-	return true, nil
 }
