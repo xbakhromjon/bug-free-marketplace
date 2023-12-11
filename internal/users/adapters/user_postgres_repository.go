@@ -1,18 +1,19 @@
 package adapters
 
 import (
-	"database/sql"
 	"golang-project-template/internal/users/domain"
 	"log"
 	"time"
+
+	"github.com/jackc/pgx"
 )
 
 type userRepository struct {
-	db *sql.DB
+	db *pgx.Conn
 	f  domain.UserFactory
 }
 
-func NewUserRepository(db *sql.DB) *userRepository {
+func NewUserRepository(db *pgx.Conn) *userRepository {
 	return &userRepository{db: db}
 }
 
@@ -105,9 +106,9 @@ func (u *userRepository) FindByID(userID int) (*domain.User, error) {
 }
 
 func (u *userRepository) UserExists(userID int) (bool, error) {
-	var exists bool
+	var exists int
 	sqlStatement := `
-	SELECT count(userID)
+	SELECT count(id)
 	FROM users
 	where id = $1
 	`
@@ -116,5 +117,5 @@ func (u *userRepository) UserExists(userID int) (bool, error) {
 		return false, err
 	}
 
-	return exists, nil
+	return exists == 1, nil
 }

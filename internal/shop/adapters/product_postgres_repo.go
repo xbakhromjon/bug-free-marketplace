@@ -4,13 +4,15 @@ import (
 	"database/sql"
 	"errors"
 	"golang-project-template/internal/shop/domain"
+
+	"github.com/jackc/pgx"
 )
 
 type productPostgresRepo struct {
-	db *sql.DB
+	db *pgx.Conn
 }
 
-func NewProductRepository(db *sql.DB) domain.ProductRepository {
+func NewProductRepository(db *pgx.Conn) domain.ProductRepository {
 
 	return &productPostgresRepo{db: db}
 }

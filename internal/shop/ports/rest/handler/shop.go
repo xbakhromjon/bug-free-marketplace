@@ -13,7 +13,7 @@ type ShopHandler struct {
 	ShopService app.ShopService
 }
 
-func (h *ShopHandler) CreateShop(w http.ResponseWriter, r *http.Request) {
+func (h *ShopHandler) 	CreateShop(w http.ResponseWriter, r *http.Request) {
 	newShop := domain.NewShop{}
 	err := json.NewDecoder(r.Body).Decode(&newShop)
 	if err != nil {
