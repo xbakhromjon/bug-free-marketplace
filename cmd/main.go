@@ -7,6 +7,8 @@ import (
 	"golang-project-template/internal/shop/domain"
 	shophandler "golang-project-template/internal/shop/ports/rest/handler"
 	userAdapters "golang-project-template/internal/users/adapters"
+	userApp "golang-project-template/internal/users/app"
+	userController "golang-project-template/internal/users/ports/http/controller"
 	"log"
 	"net/http"
 	"os"
@@ -45,11 +47,13 @@ func httpServer() *chi.Mux {
 	})
 
 	// User router
-	// ...
+	//userRepo := userAdapters.NewUserRepository(db)
+	userRepo := userAdapters.NewUserRepository(db)
+	userUsecase := userApp.NewUserUsecase(userRepo)
+	userHandler := userController.NewUserController(userUsecase)
 
 	// Shop router
 	shopRepo := shopAdapters.NewShopRepository(db)
-	userRepo := userAdapters.NewUserRepository(db)
 	shopFactory := domain.NewShopFactory(256)
 	shopService := service.NewShopService(shopRepo, shopFactory, userRepo)
 	shopHandler := shophandler.ShopHandler{ShopService: shopService}
@@ -57,14 +61,22 @@ func httpServer() *chi.Mux {
 	// Routers
 	router.Route("/api", func(r chi.Router) {
 
+		r.Route("/user", func(r chi.Router) {
+			r.Post("/register-admin/", userHandler.RegisterAdminUserHandler)
+			r.Post("/register-merchant/", userHandler.RegisterMerchantHandler)
+			r.Post("/register-customer/", userHandler.RegisterCustomerHandler)
+			r.Post("/login/", userHandler.LoginUserHandler)
+		})
+
 		r.Route("/shop", func(r chi.Router) {
+
 			r.Post("/", shopHandler.CreateShop)
 		})
 
 	})
 
 	server := &http.Server{Addr: os.Getenv("HTTP_PORT"), Handler: router}
-	log.Println("Starting server...")
+	log.Println("Starting server on port...", os.Getenv("HTTP_PORT"))
 	if err := server.ListenAndServe(); err != http.ErrServerClosed {
 		panic(err)
 	}
