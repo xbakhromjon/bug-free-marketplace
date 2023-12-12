@@ -24,7 +24,7 @@ type cartItemService struct {
 func (c *cartItemService) Add(productId int, userId int, quantity int) error {
 	err := c.repository.AddItem(productId, userId, quantity)
 	if err != nil {
-		fmt.Println(err)
+		return err
 	}
 	return nil
 }
@@ -32,7 +32,7 @@ func (c *cartItemService) Add(productId int, userId int, quantity int) error {
 func (c *cartItemService) Remove(productId int, userId int) error {
 	err := c.repository.RemoveItem(productId, userId)
 	if err != nil {
-		fmt.Println(err)
+		return err
 	}
 	return nil
 }
@@ -46,7 +46,7 @@ func (c *cartItemService) GetAll(userId int) ([]*domain.CartItems, error) {
 func (c *cartItemService) RemoveAll(userId int) error {
 	err := c.repository.RemoveAll(userId)
 	if err != nil {
-		fmt.Println(err)
+		return err
 	}
 	return nil
 }
