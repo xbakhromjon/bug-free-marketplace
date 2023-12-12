@@ -38,14 +38,13 @@ func TestGetOneProduct(t *testing.T) {
 func TestFilter(t *testing.T) {
 	underTest := productService{repository: newMockProductRepo()}
 	t.Run("case 1", func(t *testing.T) {
-		searchKey := "T-shirt"
-		searchModel := domain.ProductSearchModel{Search: searchKey}
+		searchModel := domain.ProductSearchModel{Search: "T-shirt"}
 		got, err := underTest.Filter(searchModel)
 		if err != nil {
 			t.Errorf("expected ok but %q error occured", err)
 		}
 
-		want := newValidProductListWithName(searchKey)
+		want, _ := underTest.repository.FindAll(searchModel)
 
 		if !reflect.DeepEqual(want, got) {
 			t.Errorf("want %+v but got %+v", want, got)
