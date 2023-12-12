@@ -12,6 +12,14 @@ type productPostgresRepo struct {
 	db *pgx.Conn
 }
 
+func (p *productPostgresRepo) UpdateProduct(productID int, product *domain.Product) (*domain.Product, error) {
+	_, err := p.db.Exec("UPDATE product SET price=? WHERE id = ?", product.Id, product.Price)
+	if err != nil {
+		return nil, err
+	}
+	return product, nil
+}
+
 func NewProductRepository(db *pgx.Conn) domain.ProductRepository {
 
 	return &productPostgresRepo{db: db}

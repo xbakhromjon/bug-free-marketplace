@@ -8,6 +8,7 @@ type Product struct {
 }
 
 type NewProduct struct {
+	Id     int
 	Name   string
 	Price  int
 	ShopId int
