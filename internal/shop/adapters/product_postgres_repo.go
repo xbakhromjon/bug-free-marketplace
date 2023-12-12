@@ -157,4 +157,20 @@ func BuildPageableQuery(base sq.SelectBuilder, source common.PageableRequest) {
 	}
 	base.Limit(size)
 	base.Offset((page - 1) * size)
+
+	if val, ok := source.GetSort(); ok {
+		BuildSortQuery(base, val)
+	}
+}
+
+func BuildSortQuery(base sq.SelectBuilder, source *common.SortRequest) {
+	if val, ok := source.GetSort(); ok {
+		base.OrderBy(val)
+	}
+
+	if val, ok := source.GetDirection(); ok {
+		base.OrderBy(val)
+	}
+	// TODO: add direction
+
 }
