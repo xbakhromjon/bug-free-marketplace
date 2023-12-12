@@ -3,12 +3,15 @@ package adapters
 import (
 	"fmt"
 	"golang-project-template/internal/shop/domain"
+	"time"
 
 	"github.com/jackc/pgx"
 )
 
 var (
 	shopTableName = "shop"
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
 )
 
 type shopPostgresRepo struct {
@@ -82,6 +85,40 @@ func (s *shopPostgresRepo) CheckShopNameExists(shopName string) (bool, error) {
 
 func (s *shopPostgresRepo) FindShopById(shopId int) (domain.Shop, error) {
 	shop := domain.Shop{}
+
+	queryGetShopById := fmt.Sprintf(`
+	SELECT 
+		id,
+		name,
+		owner_id,
+		created_at,
+		updated_at
+	FROM
+		%s
+	WHERE
+		deleted_at IS NULL
+	AND 
+		id=$1
+	
+`, shopTableName)
+
+	err := s.db.QueryRow(
+		queryGetShopById,
+		shopId,
+	).Scan(
+		&shop.Id,
+		&shop.Name,
+		&shop.OwnerId,
+		&CreatedAt,
+		&UpdatedAt,
+	)
+
+	if err != nil {
+		return domain.Shop{}, err
+	}
+
+	shop.CreatedAt = CreatedAt.Format(time.RFC3339)
+	shop.UpdatedAt = UpdatedAt.Format(time.RFC3339)
 
 	return shop, nil
 }
