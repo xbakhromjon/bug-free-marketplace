@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"golang-project-template/internal/shop/app"
 	"golang-project-template/internal/shop/domain"
 	"log"
@@ -67,6 +68,44 @@ func (h *ShopHandler) GetShopById(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("Error marshalling the shop:  %v", err)
 		http.Error(w, "Failed to marshall the shop", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonData)
+}
+
+func (h *ShopHandler) GetAllShops(w http.ResponseWriter, r *http.Request) {
+
+	limit, err := strconv.Atoi(r.URL.Query().Get("limit"))
+	if err != nil {
+		log.Printf("Error parsing limit: %v", err)
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+
+	offset, err := strconv.Atoi(r.URL.Query().Get("offset"))
+	if err != nil {
+		log.Printf("Error parsing offset: %v", err)
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+
+	search := r.URL.Query().Get("search")
+
+	fmt.Println(limit, offset, search)
+	shops, err := h.ShopService.GetAllShops(limit, offset, search)
+	if err != nil {
+		log.Printf("Error while getting all shops: %v", err)
+		http.Error(w, "Failed to get all shops", http.StatusInternalServerError)
+		return
+	}
+
+	jsonData, err := json.Marshal(shops)
+	if err != nil {
+		log.Printf("Error marshalling the shops:  %v", err)
+		http.Error(w, "Failed to marshall all shops", http.StatusInternalServerError)
 		return
 	}
 

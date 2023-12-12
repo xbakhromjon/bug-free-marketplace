@@ -2,6 +2,7 @@ package main
 
 import (
 	"golang-project-template/internal/common"
+	"golang-project-template/internal/common/postgres"
 	shopAdapters "golang-project-template/internal/shop/adapters"
 	service "golang-project-template/internal/shop/app"
 	"golang-project-template/internal/shop/domain"
@@ -48,7 +49,15 @@ func httpServer() *chi.Mux {
 	// ...
 
 	// Shop router
-	shopRepo := shopAdapters.NewShopRepository(db)
+	postgresDb, err := postgres.New(
+		os.Getenv("POSTGRES_HOST"),
+		os.Getenv("POSTGRES_PORT"),
+		os.Getenv("POSTGRES_DATABASE"),
+		os.Getenv("POSTGRES_USER"),
+		os.Getenv("POSTGRES_PASSWORD"),
+		"disable",
+	)
+	shopRepo := shopAdapters.NewShopRepository(postgresDb)
 	userRepo := userAdapters.NewUserRepository(db)
 	shopFactory := domain.NewShopFactory(256, 256)
 	shopService := service.NewShopService(shopRepo, shopFactory, userRepo)
@@ -60,6 +69,7 @@ func httpServer() *chi.Mux {
 		r.Route("/shop", func(r chi.Router) {
 			r.Post("/", shopHandler.CreateShop)
 			r.Get("/{id}", shopHandler.GetShopById)
+			r.Get("/", shopHandler.GetAllShops)
 		})
 
 	})

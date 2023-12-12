@@ -1,11 +1,11 @@
 package adapters
 
 import (
+	"context"
 	"fmt"
+	"golang-project-template/internal/common/postgres"
 	"golang-project-template/internal/shop/domain"
 	"time"
-
-	"github.com/jackc/pgx"
 )
 
 var (
@@ -15,10 +15,10 @@ var (
 )
 
 type shopPostgresRepo struct {
-	db *pgx.Conn
+	db *postgres.PostgresDB
 }
 
-func NewShopRepository(db *pgx.Conn) domain.ShopRepository {
+func NewShopRepository(db *postgres.PostgresDB) domain.ShopRepository {
 	return &shopPostgresRepo{db: db}
 }
 
@@ -37,6 +37,7 @@ func (s *shopPostgresRepo) Save(shop domain.NewShop) (int, error) {
 	`, shopTableName)
 
 	err := s.db.QueryRow(
+		context.Background(),
 		createShopQuery,
 		shop.Name,
 		shop.OwnerId,
@@ -70,6 +71,7 @@ func (s *shopPostgresRepo) CheckShopNameExists(shopName string) (bool, error) {
 		`, shopTableName)
 
 	err := s.db.QueryRow(
+		context.Background(),
 		queryCheckShopNameExists,
 		shopName,
 	).Scan(
@@ -102,7 +104,7 @@ func (s *shopPostgresRepo) FindShopById(shopId int) (domain.Shop, error) {
 	
 `, shopTableName)
 
-	err := s.db.QueryRow(
+	err := s.db.QueryRow(context.Background(),
 		queryGetShopById,
 		shopId,
 	).Scan(
@@ -136,17 +138,17 @@ func (s *shopPostgresRepo) FindAllShops(limit, offset int, search string) ([]dom
 		FROM
 			shop
 		WHERE
-			name LIKE '%$1%'
+			name ILIKE '%' || $1 || '%'
 		AND
 			deleted_at IS NULL
-		LIMIT 
+		LIMIT
 			$2
 		OFFSET
 			$3
-
 	`)
 
-	row, err := s.db.Query(queryGetAllShops, search, limit, offset)
+	row, err := s.db.Query(context.Background(), queryGetAllShops, search, limit, offset)
+
 	if err != nil {
 		return []domain.Shop{}, err
 	}
