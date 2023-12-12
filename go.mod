@@ -4,6 +4,7 @@ go 1.21.1
 
 require (
 	github.com/go-chi/chi/v5 v5.0.10
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/jackc/pgx v3.6.2+incompatible
 	github.com/spf13/cobra v1.8.0
 )
