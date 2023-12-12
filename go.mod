@@ -4,10 +4,9 @@ go 1.21.1
 
 require (
 	github.com/go-chi/chi v1.5.5
-	github.com/go-chi/chi/v5 v5.0.10
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/jackc/pgx v3.6.2+incompatible
 	github.com/spf13/cobra v1.8.0
-	golang.org/x/crypto v0.16.0
 )
 
 require (
@@ -19,5 +18,6 @@ require (
 	github.com/pkg/errors v0.8.1 // indirect
 	github.com/shopspring/decimal v1.2.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
+	golang.org/x/crypto v0.16.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 )
