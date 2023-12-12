@@ -79,3 +79,9 @@ func (s *shopPostgresRepo) CheckShopNameExists(shopName string) (bool, error) {
 
 	return exists, nil
 }
+
+func (s *shopPostgresRepo) FindShopById(shopId int) (domain.Shop, error) {
+	shop := domain.Shop{}
+
+	return shop, nil
+}

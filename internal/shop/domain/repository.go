@@ -3,6 +3,7 @@ package domain
 type ShopRepository interface {
 	Save(shop NewShop) (int, error)
 	CheckShopNameExists(string) (bool, error)
+	FindShopById(int) (Shop, error)
 }
 
 type UserRepo interface {
@@ -21,6 +22,7 @@ const (
 	ErrInvalidShopName = Err("shop name max length must be 128 characters")
 	ErrShopNameExists  = Err("This shop name already exists")
 	ErrUserNotExists   = Err("No such user")
+	ErrShopNotFound    = Err("Shop not found")
 )
 
 type Err string

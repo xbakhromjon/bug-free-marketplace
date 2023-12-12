@@ -3,7 +3,15 @@ package app
 import (
 	"golang-project-template/internal/shop/domain"
 	"testing"
+	"time"
 )
+
+type mockShopRepo struct {
+}
+
+func newMockShopRepo() domain.ShopRepository {
+	return &mockShopRepo{}
+}
 
 func (m *mockShopRepo) Save(shop domain.NewShop) (int, error) {
 	if shop.Name == "" {
@@ -23,11 +31,11 @@ func (m *mockShopRepo) CheckShopNameExists(shopName string) (bool, error) {
 	return false, nil
 }
 
-type mockShopRepo struct {
-}
-
-func newMockShopRepo() domain.ShopRepository {
-	return &mockShopRepo{}
+func (m *mockShopRepo) FindShopById(id int) (domain.Shop, error) {
+	if id == 1 {
+		return newValidShop(), nil
+	}
+	return domain.Shop{}, domain.ErrShopNotFound
 }
 
 type mockUserRepo struct {
@@ -108,5 +116,44 @@ func TestCreateShop(t *testing.T) {
 				t.Errorf("Expected %v, but got %v", test.wantedErr, gotErr)
 			}
 		})
+	}
+}
+
+func TestGetShopById(t *testing.T) {
+	underTest := shopService{
+		repository:     newMockShopRepo(),
+		shopFactory:    domain.NewShopFactory(20),
+		userRepository: mockUserRepo{},
+	}
+
+	t.Run("Get Shop By correct Id", func(t *testing.T) {
+		got, err := underTest.GetShopById(1)
+		want := newValidShop()
+		if err != nil {
+			t.Errorf("Error didn`t expected, but got %v", err)
+		} else if got != want {
+			t.Errorf("want %v, but got %v", want, got)
+		}
+
+	})
+
+	t.Run("Get Shop By incorrect Id", func(t *testing.T) {
+		_, err := underTest.GetShopById(2)
+		want := domain.ErrShopNotFound
+		if err == nil {
+			t.Error("Expected err, but but didn`t get")
+		} else if err != want {
+			t.Errorf("want %q, but got %q", want, err)
+		}
+
+	})
+}
+func newValidShop() domain.Shop {
+	return domain.Shop{
+		Id:        1,
+		Name:      "Default shop name",
+		OwnerId:   1,
+		CreatedAt: time.Now().Format(time.RFC1123),
+		UpdatedAt: time.Now().Format(time.RFC1123),
 	}
 }
