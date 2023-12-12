@@ -59,6 +59,7 @@ func httpServer() *chi.Mux {
 
 		r.Route("/shop", func(r chi.Router) {
 			r.Post("/", shopHandler.CreateShop)
+			r.Get("/{id}", shopHandler.GetShopById)
 		})
 
 	})
