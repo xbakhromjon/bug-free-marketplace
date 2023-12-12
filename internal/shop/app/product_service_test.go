@@ -37,14 +37,32 @@ func TestGetOneProduct(t *testing.T) {
 
 func TestFilter(t *testing.T) {
 	underTest := productService{repository: newMockProductRepo()}
-	t.Run("case 1", func(t *testing.T) {
-		searchModel := domain.ProductSearchModel{Search: "T-shirt"}
-		got, err := underTest.Filter(searchModel)
+	t.Run("result proper with repository returned result", func(t *testing.T) {
+		searchModel := underTest.factory.CreateNewSearchModel("T-shirt", 10, 20)
+		got, err := underTest.Filter(*searchModel)
 		if err != nil {
 			t.Errorf("expected ok but %q error occured", err)
 		}
 
-		want, _ := underTest.repository.FindAll(searchModel)
+		want, _ := underTest.repository.FindAll(*searchModel)
+
+		if !reflect.DeepEqual(want, got) {
+			t.Errorf("want %+v but got %+v", want, got)
+		}
+	})
+}
+
+func TestFilterByPageable(t *testing.T) {
+	underTest := productService{repository: newMockProductRepo()}
+	t.Run("result proper with repository returned result", func(t *testing.T) {
+		searchModel := *underTest.factory.CreateNewSearchModel("T-shirt", 10, 20)
+		pageableRequest := *common.CreateDefaultPageableRequest()
+		got, err := underTest.FilterByPageable(searchModel, pageableRequest)
+		if err != nil {
+			t.Errorf("expected ok but %q error occured", err)
+		}
+
+		want, _ := underTest.repository.FindAllWithPageable(searchModel, pageableRequest)
 
 		if !reflect.DeepEqual(want, got) {
 			t.Errorf("want %+v but got %+v", want, got)
@@ -83,8 +101,8 @@ func (m *mockProductRepo) FindAll(searchModel domain.ProductSearchModel) ([]*dom
 }
 
 func (m *mockProductRepo) FindAllWithPageable(searchModel domain.ProductSearchModel, pageable common.PageableRequest) (*common.PageableResult[domain.Product], error) {
-
-	return nil, nil
+	result := newValidProductPageableResult("T-shirt")
+	return result, nil
 }
 
 func newValidProduct() *domain.Product {
@@ -104,4 +122,14 @@ func newValidProductListWithName(name string) []*domain.Product {
 		ShopId: 1,
 	}}
 	return list
+}
+
+func newValidProductPageableResult(name string) *common.PageableResult[domain.Product] {
+	content := []domain.Product{{
+		Id:     1,
+		Name:   name,
+		Price:  100,
+		ShopId: 1,
+	}}
+	return common.CreatePageableResult(content, 1)
 }

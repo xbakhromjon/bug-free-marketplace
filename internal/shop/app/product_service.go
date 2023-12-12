@@ -1,6 +1,7 @@
 package app
 
 import (
+	"golang-project-template/internal/common"
 	"golang-project-template/internal/shop/domain"
 )
 
@@ -9,15 +10,17 @@ type ProductService interface {
 	GetOne(id int) (*domain.Product, error)
 	GetAllByShopId(shopId int) ([]*domain.Product, error)
 	Filter(searchModel domain.ProductSearchModel) ([]*domain.Product, error)
+	FilterByPageable(searchModel domain.ProductSearchModel, pageable common.PageableRequest) (*common.PageableResult[domain.Product], error)
 }
 
-func NewProductService(repository domain.ProductRepository) ProductService {
+func NewProductService(repository domain.ProductRepository, factory domain.ProductFactory) ProductService {
 
-	return &productService{repository: repository}
+	return &productService{repository: repository, factory: factory}
 }
 
 type productService struct {
 	repository domain.ProductRepository
+	factory    domain.ProductFactory
 }
 
 func (p *productService) Add(req domain.NewProduct) (int, error) {
@@ -45,4 +48,12 @@ func (p *productService) Filter(searchModel domain.ProductSearchModel) ([]*domai
 		return nil, err
 	}
 	return products, nil
+}
+
+func (p *productService) FilterByPageable(searchModel domain.ProductSearchModel, pageable common.PageableRequest) (*common.PageableResult[domain.Product], error) {
+	result, err := p.repository.FindAllWithPageable(searchModel, pageable)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
