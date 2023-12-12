@@ -62,3 +62,9 @@ go-get:
 	@echo "Go get ${arg}"
 	sleep 2
 	docker-compose exec app go get -d ${arg}
+
+.PHONY: mod-tidy
+mod-tidy:
+	@echo "Go mod tidy"
+	sleep 2
+	docker-compose exec app go mod tidy
