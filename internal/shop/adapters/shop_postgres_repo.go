@@ -124,8 +124,51 @@ func (s *shopPostgresRepo) FindShopById(shopId int) (domain.Shop, error) {
 }
 
 func (s *shopPostgresRepo) FindAllShops(limit, offset int, search string) ([]domain.Shop, error) {
-
 	shops := []domain.Shop{}
+
+	queryGetAllShops := fmt.Sprint(`
+		SELECT 
+			id,
+			name,
+			owner_id,
+			created_at,
+			updated_at
+		FROM
+			shop
+		WHERE
+			name LIKE '%$1%'
+		AND
+			deleted_at IS NULL
+		LIMIT 
+			$2
+		OFFSET
+			$3
+
+	`)
+
+	row, err := s.db.Query(queryGetAllShops, search, limit, offset)
+	if err != nil {
+		return []domain.Shop{}, err
+	}
+	defer row.Close()
+
+	for row.Next() {
+		shop := domain.Shop{}
+		err := row.Scan(
+			&shop.Id,
+			&shop.Name,
+			&shop.OwnerId,
+			&CreatedAt,
+			&UpdatedAt,
+		)
+		if err != nil {
+			return []domain.Shop{}, err
+		}
+		shop.CreatedAt = CreatedAt.Format(time.RFC1123)
+		shop.UpdatedAt = UpdatedAt.Format(time.RFC1123)
+
+		shops = append(shops, shop)
+	}
 
 	return shops, nil
 }
