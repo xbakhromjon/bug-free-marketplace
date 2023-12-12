@@ -12,7 +12,7 @@ func (f UserFactory) CreateMerchantUser(user *NewUser) *User {
 	return &User{
 		name:        user.name,
 		phoneNumber: user.phoneNumber,
-		password:    user.phoneNumber,
+		password:    user.password,
 		role:        "merchant",
 		createAt:    time.Now().UTC(),
 		updatedAt:   time.Now().UTC(),
@@ -24,8 +24,20 @@ func (f UserFactory) CreateCustomerUser(user *NewUser) *User {
 	return &User{
 		name:        user.name,
 		phoneNumber: user.phoneNumber,
-		password:    user.phoneNumber,
-		role:        "customer",
+		password:    user.password,
+		role:        "user",
+		createAt:    time.Now().UTC(),
+		updatedAt:   time.Now().UTC(),
+		deletedAt:   nil,
+	}
+}
+
+func (f UserFactory) CreateAdminUser(user *NewUser) *User {
+	return &User{
+		name:        user.name,
+		phoneNumber: user.phoneNumber,
+		password:    user.password,
+		role:        "admin",
 		createAt:    time.Now().UTC(),
 		updatedAt:   time.Now().UTC(),
 		deletedAt:   nil,
@@ -52,4 +64,19 @@ func (f UserFactory) ParseModelToDomain(
 		updatedAt:   updatedAt,
 		deletedAt:   deletedAt,
 	}
+}
+
+const (
+	ErrUserNotFound       = Err("user not found")
+	ErrEmptyUserName      = Err("user name can not be empty")
+	ErrEmptyPhoneNumber   = Err("phone number can not be empty")
+	ErrInvalidCredentials = Err("bad credentials")
+	ErrPhoneNumberExists  = Err("this phone number already exists")
+	ErrInvalidPassword    = Err("invalid password")
+)
+
+type Err string
+
+func (e Err) Error() string {
+	return string(e)
 }
