@@ -1,7 +1,9 @@
 package app
 
 import (
+	"golang-project-template/internal/common"
 	"golang-project-template/internal/shop/domain"
+	"reflect"
 	"testing"
 )
 
@@ -33,6 +35,24 @@ func TestGetOneProduct(t *testing.T) {
 	})
 }
 
+func TestFilter(t *testing.T) {
+	underTest := productService{repository: newMockProductRepo()}
+	t.Run("case 1", func(t *testing.T) {
+		searchKey := "T-shirt"
+		searchModel := domain.ProductSearchModel{Search: searchKey}
+		got, err := underTest.Filter(searchModel)
+		if err != nil {
+			t.Errorf("expected ok but %q error occured", err)
+		}
+
+		want := newValidProductListWithName(searchKey)
+
+		if !reflect.DeepEqual(want, got) {
+			t.Errorf("want %+v but got %+v", want, got)
+		}
+	})
+}
+
 type mockProductRepo struct {
 }
 
@@ -58,6 +78,16 @@ func (m *mockProductRepo) FindAllByShopId(shopId int) ([]*domain.Product, error)
 	panic("implement me")
 }
 
+func (m *mockProductRepo) FindAll(searchModel domain.ProductSearchModel) ([]*domain.Product, error) {
+	resp := newValidProductListWithName("T-shirt")
+	return resp, nil
+}
+
+func (m *mockProductRepo) FindAllWithPageable(searchModel domain.ProductSearchModel, pageable common.PageableRequest) (*common.PageableResult[domain.Product], error) {
+
+	return nil, nil
+}
+
 func newValidProduct() *domain.Product {
 	return &domain.Product{
 		Id:     1,
@@ -65,4 +95,14 @@ func newValidProduct() *domain.Product {
 		Price:  100,
 		ShopId: 1,
 	}
+}
+
+func newValidProductListWithName(name string) []*domain.Product {
+	list := []*domain.Product{{
+		Id:     1,
+		Name:   name,
+		Price:  100,
+		ShopId: 1,
+	}}
+	return list
 }

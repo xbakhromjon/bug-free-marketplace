@@ -8,6 +8,7 @@ type ProductService interface {
 	Add(req domain.NewProduct) (int, error)
 	GetOne(id int) (*domain.Product, error)
 	GetAllByShopId(shopId int) ([]*domain.Product, error)
+	Filter(searchModel domain.ProductSearchModel) ([]*domain.Product, error)
 }
 
 func NewProductService(repository domain.ProductRepository) ProductService {
@@ -36,4 +37,12 @@ func (p *productService) GetOne(id int) (*domain.Product, error) {
 func (p *productService) GetAllByShopId(shopId int) ([]*domain.Product, error) {
 	//TODO implement me
 	panic("implement me")
+}
+
+func (p *productService) Filter(searchModel domain.ProductSearchModel) ([]*domain.Product, error) {
+	products, err := p.repository.FindAll(searchModel)
+	if err != nil {
+		return nil, err
+	}
+	return products, nil
 }
