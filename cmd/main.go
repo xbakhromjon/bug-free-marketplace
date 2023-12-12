@@ -50,7 +50,7 @@ func httpServer() *chi.Mux {
 	// Shop router
 	shopRepo := shopAdapters.NewShopRepository(db)
 	userRepo := userAdapters.NewUserRepository(db)
-	shopFactory := domain.NewShopFactory(256)
+	shopFactory := domain.NewShopFactory(256, 256)
 	shopService := service.NewShopService(shopRepo, shopFactory, userRepo)
 	shopHandler := shophandler.ShopHandler{ShopService: shopService}
 

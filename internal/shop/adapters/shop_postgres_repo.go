@@ -122,3 +122,10 @@ func (s *shopPostgresRepo) FindShopById(shopId int) (domain.Shop, error) {
 
 	return shop, nil
 }
+
+func (s *shopPostgresRepo) FindAllShops(limit, offset int, search string) ([]domain.Shop, error) {
+
+	shops := []domain.Shop{}
+
+	return shops, nil
+}

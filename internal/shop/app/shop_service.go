@@ -7,6 +7,7 @@ import (
 type ShopService interface {
 	Create(domain.NewShop) (int, error)
 	GetShopById(int) (domain.Shop, error)
+	GetAllShops(int, int, string) ([]domain.Shop, error)
 }
 
 type shopService struct {
@@ -58,4 +59,12 @@ func (s *shopService) Create(req domain.NewShop) (int, error) {
 
 func (s *shopService) GetShopById(id int) (domain.Shop, error) {
 	return s.repository.FindShopById(id)
+}
+
+func (s *shopService) GetAllShops(limit, offset int, search string) ([]domain.Shop, error) {
+	err := s.shopFactory.GetAllShopsInputValidate(limit, offset, search)
+	if err != nil {
+		return []domain.Shop{}, err
+	}
+	return s.repository.FindAllShops(limit, offset, search)
 }

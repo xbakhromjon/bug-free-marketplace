@@ -2,6 +2,7 @@ package app
 
 import (
 	"golang-project-template/internal/shop/domain"
+	"reflect"
 	"testing"
 	"time"
 )
@@ -38,6 +39,17 @@ func (m *mockShopRepo) FindShopById(id int) (domain.Shop, error) {
 	return domain.Shop{}, domain.ErrShopNotFound
 }
 
+func (m *mockShopRepo) FindAllShops(limit, offset int, search string) ([]domain.Shop, error) {
+
+	if limit == 1 && offset == 1 && search == "Default" {
+		return []domain.Shop{
+			newValidShop(),
+		}, nil
+	}
+
+	return []domain.Shop{}, nil
+}
+
 type mockUserRepo struct {
 }
 
@@ -52,7 +64,7 @@ func TestCreateShop(t *testing.T) {
 
 	underTest := shopService{
 		repository:     newMockShopRepo(),
-		shopFactory:    domain.NewShopFactory(20),
+		shopFactory:    domain.NewShopFactory(20, 10),
 		userRepository: mockUserRepo{},
 	}
 
@@ -122,7 +134,6 @@ func TestCreateShop(t *testing.T) {
 func TestGetShopById(t *testing.T) {
 	underTest := shopService{
 		repository:     newMockShopRepo(),
-		shopFactory:    domain.NewShopFactory(20),
 		userRepository: mockUserRepo{},
 	}
 
@@ -131,7 +142,7 @@ func TestGetShopById(t *testing.T) {
 		want := newValidShop()
 		if err != nil {
 			t.Errorf("Error didn`t expected, but got %v", err)
-		} else if got != want {
+		} else if !reflect.DeepEqual(want, got) {
 			t.Errorf("want %v, but got %v", want, got)
 		}
 
@@ -148,6 +159,53 @@ func TestGetShopById(t *testing.T) {
 
 	})
 }
+
+func TestGetAllShops(t *testing.T) {
+	underTest := shopService{
+		repository:     newMockShopRepo(),
+		shopFactory:    domain.NewShopFactory(20, 10),
+		userRepository: mockUserRepo{},
+	}
+
+	t.Run("GetAllShops successfully", func(t *testing.T) {
+		want := []domain.Shop{
+			newValidShop(),
+		}
+		got, err := underTest.GetAllShops(1, 1, "Default")
+
+		if err != nil {
+			t.Errorf("Didn`t expect error, but got %q", err)
+		} else if !reflect.DeepEqual(got, want) {
+			t.Errorf("Expected %q, but got %q", want, got)
+		}
+	})
+
+	cases := []struct {
+		label     string
+		limit     int
+		offset    int
+		search    string
+		wantedErr domain.Err
+	}{
+		{"invalid limit", 101, 1, "something", domain.ErrInvalidLimit},
+		{"invalid offset", 28, -2, "something", domain.ErrInvalidOffset},
+		{"invalid search", 28, 1, "long search string", domain.ErrInvalidSearch},
+	}
+
+	for _, test := range cases {
+		t.Run(test.label, func(t *testing.T) {
+			_, err := underTest.GetAllShops(test.limit, test.offset, test.search)
+
+			if err == nil {
+				t.Error("Expected error, but didn`t get")
+			} else if err != test.wantedErr {
+				t.Errorf("Expected %v, but got %v", test.wantedErr, err)
+			}
+		})
+	}
+
+}
+
 func newValidShop() domain.Shop {
 	return domain.Shop{
 		Id:        1,
