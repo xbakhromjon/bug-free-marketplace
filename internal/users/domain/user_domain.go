@@ -51,8 +51,8 @@ func (u *User) GetUpdatedAt() time.Time {
 	return u.updatedAt
 }
 
-func (u *User) GetDeletedAt() time.Time {
-	return *u.deletedAt
+func (u *User) GetDeletedAt() *time.Time {
+	return u.deletedAt
 }
 
 // User-setter

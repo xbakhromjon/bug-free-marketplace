@@ -2,11 +2,25 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
 	jwt "golang-project-template/internal/pkg/jwt"
 	"golang-project-template/internal/users/app"
 	"golang-project-template/internal/users/domain"
 	"net/http"
+	"time"
+
+	"github.com/go-chi/chi/v5"
 )
+
+type userObject struct {
+	Id          int        `json:"id"`
+	Name        string     `json:"name"`
+	PhoneNumber string     `json:"phone_number"`
+	Role        string     `json:"role"`
+	CreateAt    time.Time  `json:"created_at"`
+	UpdatedAt   time.Time  `json:"updated_at"`
+	DeletedAt   *time.Time `json:"deleted_at"`
+}
 
 type loginRequest struct {
 	PhoneNumber string
@@ -38,7 +52,6 @@ func (c *UserController) RegisterAdminUserHandler(w http.ResponseWriter, r *http
 	}
 
 	//writing to the HEADER
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(id)
 }
@@ -61,7 +74,6 @@ func (c *UserController) RegisterCustomerHandler(w http.ResponseWriter, r *http.
 	}
 
 	//writing to the HEADER
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(id)
 }
@@ -84,13 +96,11 @@ func (c *UserController) RegisterMerchantHandler(w http.ResponseWriter, r *http.
 	}
 
 	//writing to the HEADER
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(id)
 }
 
 func (c *UserController) LoginUserHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	var req loginRequest
 
 	//decoding requested body to go object
@@ -119,5 +129,29 @@ func (c *UserController) LoginUserHandler(w http.ResponseWriter, r *http.Request
 	} else {
 		http.Error(w, "invalid credentials", http.StatusUnauthorized)
 	}
+
+}
+
+func (c *UserController) GetUserByPhoneNumberHandler(w http.ResponseWriter, r *http.Request) {
+	phoneNumber := chi.URLParam(r, "pn")
+	var newUser userObject
+
+	user, err := c.userUsecase.GetUserByPhoneNumber(phoneNumber)
+	fmt.Println(user)
+	if err != nil {
+		http.Error(w, "internal error: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	newUser.Id = user.GetID()
+	newUser.Name = user.GetName()
+	newUser.PhoneNumber = user.GetPhoneNumber()
+	newUser.Role = user.GetRole()
+	newUser.CreateAt = user.GetCreatedAt()
+	newUser.UpdatedAt = user.GetUpdatedAt()
+	newUser.DeletedAt = user.GetDeletedAt()
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(&newUser)
 
 }
