@@ -17,8 +17,7 @@ func CreateToken(sub string) (string, error) {
 
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	jwtSecretKey := config.NewConfig().JwtSecretKey
-
-	token, err := jwtToken.SignedString(jwtSecretKey)
+	token, err := jwtToken.SignedString([]byte(jwtSecretKey))
 	if err != nil {
 		return "", err
 	}

@@ -260,27 +260,27 @@ func assertEqual[T comparable](t testing.TB, got, want T) {
 
 func mockUserForTestRegister() *domain.NewUser {
 	newUser := &domain.NewUser{}
-	newUser.SetName("Quvonchbek")
-	newUser.SetPhoneNumber("998990970138")
-	newUser.SetPassword("Golang123")
+	newUser.Name = "Quvonchbek"
+	newUser.PhoneNumber = "998990970138"
+	newUser.Password = "Golang123"
 
 	return newUser
 }
 
 func mockEmptyNameUserForTestRegister() *domain.NewUser {
 	newUser := &domain.NewUser{}
-	newUser.SetName("")
-	newUser.SetPhoneNumber("998990970138")
-	newUser.SetPassword("Golang123")
+	newUser.Name = ""
+	newUser.PhoneNumber = "998990970138"
+	newUser.Password = "Golang123"
 
 	return newUser
 }
 
 func mockUserWithPhoneForTestRegister(phone string) *domain.NewUser {
 	newUser := &domain.NewUser{}
-	newUser.SetName("Quvonchbek")
-	newUser.SetPhoneNumber(phone)
-	newUser.SetPassword("Golang123")
+	newUser.Name = "Quvonchbek"
+	newUser.PhoneNumber = phone
+	newUser.Password = "Golang123"
 
 	return newUser
 }

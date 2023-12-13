@@ -10,9 +10,9 @@ func NewUserFactory() *UserFactory {
 
 func (f UserFactory) CreateMerchantUser(user *NewUser) *User {
 	return &User{
-		name:        user.name,
-		phoneNumber: user.phoneNumber,
-		password:    user.password,
+		name:        user.Name,
+		phoneNumber: user.PhoneNumber,
+		password:    user.Password,
 		role:        "merchant",
 		createAt:    time.Now().UTC(),
 		updatedAt:   time.Now().UTC(),
@@ -22,9 +22,9 @@ func (f UserFactory) CreateMerchantUser(user *NewUser) *User {
 
 func (f UserFactory) CreateCustomerUser(user *NewUser) *User {
 	return &User{
-		name:        user.name,
-		phoneNumber: user.phoneNumber,
-		password:    user.password,
+		name:        user.Name,
+		phoneNumber: user.PhoneNumber,
+		password:    user.Password,
 		role:        "user",
 		createAt:    time.Now().UTC(),
 		updatedAt:   time.Now().UTC(),
@@ -34,9 +34,9 @@ func (f UserFactory) CreateCustomerUser(user *NewUser) *User {
 
 func (f UserFactory) CreateAdminUser(user *NewUser) *User {
 	return &User{
-		name:        user.name,
-		phoneNumber: user.phoneNumber,
-		password:    user.password,
+		name:        user.Name,
+		phoneNumber: user.PhoneNumber,
+		password:    user.Password,
 		role:        "admin",
 		createAt:    time.Now().UTC(),
 		updatedAt:   time.Now().UTC(),

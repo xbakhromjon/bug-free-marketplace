@@ -61,7 +61,7 @@ func httpServer() *chi.Mux {
 	// Routers
 	router.Route("/api", func(r chi.Router) {
 
-		r.Route("/user", func(r chi.Router) {
+		r.Route("/users", func(r chi.Router) {
 			r.Post("/register-admin/", userHandler.RegisterAdminUserHandler)
 			r.Post("/register-merchant/", userHandler.RegisterMerchantHandler)
 			r.Post("/register-customer/", userHandler.RegisterCustomerHandler)
