@@ -2,7 +2,6 @@ package controller
 
 import (
 	"encoding/json"
-	"fmt"
 	jwt "golang-project-template/internal/pkg/jwt"
 	"golang-project-template/internal/users/app"
 	"golang-project-template/internal/users/domain"
@@ -100,7 +99,6 @@ func (c *UserController) LoginUserHandler(w http.ResponseWriter, r *http.Request
 		http.Error(w, "invalid request body: "+err.Error(), http.StatusBadRequest)
 		return
 	}
-	fmt.Println("login req: ", req.Password, req.PhoneNumber)
 	passed, err := c.userUsecase.LoginUser(req.PhoneNumber, req.Password)
 	if err != nil {
 		http.Error(w, "Invalid password or phone number", http.StatusInternalServerError)
