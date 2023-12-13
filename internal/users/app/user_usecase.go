@@ -17,7 +17,7 @@ type UserUsecase interface {
 	RegisterCustomer(user *domain.NewUser) (int, error)
 	RegisterAdmin(user *domain.NewUser) (int, error)
 	LoginUser(phoneNumber, pass string) (bool, error)
-	GetUserDataPhoneNumber(phoneNumber string) (*domain.User, error)
+	GetUserByPhoneNumber(phoneNumber string) (*domain.User, error)
 	GetUserByID(id int) (*domain.User, error)
 	UserExists(id int) (bool, error)
 }
@@ -137,7 +137,7 @@ func (u *userUsecase) LoginUser(phoneNumber, pass string) (bool, error) {
 	return true, nil
 }
 
-func (u *userUsecase) GetUserDataPhoneNumber(phoneNumber string) (*domain.User, error) {
+func (u *userUsecase) GetUserByPhoneNumber(phoneNumber string) (*domain.User, error) {
 
 	if strings.TrimSpace(phoneNumber) == "" {
 		return nil, domain.ErrEmptyPhoneNumber

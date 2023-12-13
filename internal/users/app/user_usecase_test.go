@@ -184,12 +184,12 @@ func TestLoginUser(t *testing.T) {
 		})
 	}
 }
-func TestGetUserDataPhoneNumber(t *testing.T) {
+func TestGetUserByPhoneNumber(t *testing.T) {
 	underTest := userUsecase{userRepository: &mockUserRepo{}}
 
 	t.Run("success get user by phone", func(t *testing.T) {
 
-		got, err := underTest.GetUserDataPhoneNumber("998990970138")
+		got, err := underTest.GetUserByPhoneNumber("998990970138")
 		wantedUser := createUserWithPhoneNumber("998990970138")
 
 		assertEqual[error](t, err, nil)
@@ -198,12 +198,12 @@ func TestGetUserDataPhoneNumber(t *testing.T) {
 	})
 
 	t.Run("get user by phone (user not found by phone)", func(t *testing.T) {
-		_, err := underTest.GetUserDataPhoneNumber("phone_number")
+		_, err := underTest.GetUserByPhoneNumber("phone_number")
 		assertEqual[error](t, err, domain.ErrUserNotFound)
 	})
 
 	t.Run("get user by phone (empty phone number)", func(t *testing.T) {
-		_, err := underTest.GetUserDataPhoneNumber("")
+		_, err := underTest.GetUserByPhoneNumber("")
 		assertEqual[error](t, err, domain.ErrEmptyPhoneNumber)
 	})
 }
