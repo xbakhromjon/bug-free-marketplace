@@ -21,7 +21,6 @@ func (p *productPostgresRepo) UpdateProduct(productID int, product *domain.Produ
 }
 
 func NewProductRepository(db *pgx.Conn) domain.ProductRepository {
-
 	return &productPostgresRepo{db: db}
 }
 
