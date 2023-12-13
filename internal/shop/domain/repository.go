@@ -9,6 +9,11 @@ var saveShopError = errors.New("save shop error")
 
 type ShopRepository interface {
 	Save(shop NewShop) (int, error)
+	CheckShopNameExists(string) (bool, error)
+}
+
+type UserRepo interface {
+	UserExists(id int) (bool, error)
 }
 
 type ProductRepository interface {
@@ -21,6 +26,10 @@ type ProductRepository interface {
 
 const (
 	ErrProductNotFound = Err("product not found")
+	ErrEmptyShopName   = Err("shop name can not be empty")
+	ErrInvalidShopName = Err("shop name max length must be 128 characters")
+	ErrShopNameExists  = Err("This shop name already exists")
+	ErrUserNotExists   = Err("No such user")
 )
 
 type Err string

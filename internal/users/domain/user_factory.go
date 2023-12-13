@@ -4,13 +4,55 @@ import "time"
 
 type UserFactory struct{}
 
+func NewUserFactory() *UserFactory {
+	return &UserFactory{}
+}
+
+func (f UserFactory) CreateMerchantUser(user *NewUser) *User {
+	return &User{
+		name:        user.name,
+		phoneNumber: user.phoneNumber,
+		password:    user.password,
+		role:        "merchant",
+		createAt:    time.Now().UTC(),
+		updatedAt:   time.Now().UTC(),
+		deletedAt:   nil,
+	}
+}
+
+func (f UserFactory) CreateCustomerUser(user *NewUser) *User {
+	return &User{
+		name:        user.name,
+		phoneNumber: user.phoneNumber,
+		password:    user.password,
+		role:        "user",
+		createAt:    time.Now().UTC(),
+		updatedAt:   time.Now().UTC(),
+		deletedAt:   nil,
+	}
+}
+
+func (f UserFactory) CreateAdminUser(user *NewUser) *User {
+	return &User{
+		name:        user.name,
+		phoneNumber: user.phoneNumber,
+		password:    user.password,
+		role:        "admin",
+		createAt:    time.Now().UTC(),
+		updatedAt:   time.Now().UTC(),
+		deletedAt:   nil,
+	}
+}
+
 func (f UserFactory) ParseModelToDomain(
 	id int,
 	name,
 	phoneNumber,
 	password,
 	role string,
-	createAt time.Time,
+	createdAt time.Time,
+	updatedAt time.Time,
+	deletedAt *time.Time,
 ) *User {
 	return &User{
 		id:          id,
@@ -18,20 +60,23 @@ func (f UserFactory) ParseModelToDomain(
 		phoneNumber: phoneNumber,
 		password:    password,
 		role:        role,
-		createAt:    time.Now().UTC(),
+		createAt:    createdAt,
+		updatedAt:   updatedAt,
+		deletedAt:   deletedAt,
 	}
 }
 
-func CreateUserFactory(newUser *NewUser) *User {
-	currentTime := time.Now()
-	return &User{
-		name:        newUser.GetName(),
-		phoneNumber: newUser.GetPhoneNumber(),
-		password:    newUser.GetPassword(),
-		role:        newUser.GetRole(),
-		createAt:    currentTime,
-		updatedAt:   currentTime,
+const (
+	ErrUserNotFound       = Err("user not found")
+	ErrEmptyUserName      = Err("user name can not be empty")
+	ErrEmptyPhoneNumber   = Err("phone number can not be empty")
+	ErrInvalidCredentials = Err("bad credentials")
+	ErrPhoneNumberExists  = Err("this phone number already exists")
+	ErrInvalidPassword    = Err("invalid password")
+)
 
-		deletedAt: nil,
-	}
+type Err string
+
+func (e Err) Error() string {
+	return string(e)
 }

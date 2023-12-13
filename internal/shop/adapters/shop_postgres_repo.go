@@ -1,9 +1,10 @@
 package adapters
 
 import (
-	"database/sql"
 	"fmt"
 	"golang-project-template/internal/shop/domain"
+
+	"github.com/jackc/pgx"
 )
 
 var (
@@ -11,10 +12,10 @@ var (
 )
 
 type shopPostgresRepo struct {
-	db *sql.DB
+	db *pgx.Conn
 }
 
-func NewShopRepository(db *sql.DB) domain.ShopRepository {
+func NewShopRepository(db *pgx.Conn) domain.ShopRepository {
 	return &shopPostgresRepo{db: db}
 }
 
@@ -45,4 +46,36 @@ func (s *shopPostgresRepo) Save(shop domain.NewShop) (int, error) {
 	}
 
 	return id, nil
+}
+
+func (s *shopPostgresRepo) CheckShopNameExists(shopName string) (bool, error) {
+	var exists bool
+	queryCheckShopNameExists := fmt.Sprintf(`
+		SELECT 
+		EXISTS(
+			SELECT
+				name
+			FROM 
+				%s
+			WHERE 
+				name = $1
+			AND 
+				deleted_at
+			IS NULL
+		);
+			
+		`, shopTableName)
+
+	err := s.db.QueryRow(
+		queryCheckShopNameExists,
+		shopName,
+	).Scan(
+		&exists,
+	)
+
+	if err != nil {
+		return false, err
+	}
+
+	return exists, nil
 }

@@ -10,21 +10,12 @@ import (
 	"golang-project-template/internal/shop/domain"
 )
 
-var productPostgresRepoInstance *productPostgresRepo
-
 type productPostgresRepo struct {
 	db *pgx.Conn
 }
 
-func GetProductRepositoryInstance(db *pgx.Conn) domain.ProductRepository {
-	if productPostgresRepoInstance == nil {
-		productPostgresRepoInstance = &productPostgresRepo{db: db}
-	}
-
-	return productPostgresRepoInstance
-}
-
 func NewProductRepository(db *pgx.Conn) domain.ProductRepository {
+
 	return &productPostgresRepo{db: db}
 }
 
