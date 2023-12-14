@@ -1,7 +1,7 @@
 package domain
 
 type CartRepository interface {
-	Create(cart *Cart) error
+	Create(cart *Cart) (int, error)
 	CreateCardItem(cart *CartItems) (int, error)
 	GetById(id int) (*CartItems, error)
 	UpdateCartItem(userId, productId, quantity int) error

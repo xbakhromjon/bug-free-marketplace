@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/jackc/pgx"
-	domain2 "golang-project-template/internal/order/domain"
+	domain2 "golang-project-template/internal/basket/domain"
 )
 
 type cartRepo struct {

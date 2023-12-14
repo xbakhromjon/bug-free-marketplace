@@ -2,12 +2,14 @@ package app
 
 import (
 	"errors"
-	domain2 "golang-project-template/internal/order/domain"
+	domain2 "golang-project-template/internal/basket/domain"
 	"golang-project-template/internal/shop/domain"
 )
 
 type CartService interface {
-	Create(req domain2.CartItems) error
+	CreateCartItem(req domain2.CartItems) error
+	CreateCart(userID int) (int, error)
+	GetBasket(userID int) (*domain2.Cart, error)
 	AddProductToCart(userID, productID, quantity int) error
 	DeleteProductFromCart(userId, productId int) error
 }
@@ -21,17 +23,37 @@ type CartServiceImpl struct {
 	productRepo domain.ProductRepository
 }
 
-func (cs CartServiceImpl) DeleteProductFromCart(userId, productId int) error {
-	cart, err := cs.cartRepo.GetByUserId(userId)
+func (cs CartServiceImpl) CreateCart(userID int) (int, error) {
+	cart := &domain2.Cart{
+		UserId: userID,
+	}
+	cartID, err := cs.cartRepo.Create(cart)
+	if err != nil {
+		return 0, err
+	}
+	return cartID, nil
+}
+
+func (cs CartServiceImpl) CreateCartItem(req domain2.CartItems) error {
+	cart := &domain2.CartItems{
+		Id:        req.Id,
+		CartId:    req.CartId,
+		ProductId: req.ProductId,
+		Quantity:  req.Quantity,
+	}
+	_, err := cs.cartRepo.CreateCardItem(cart)
 	if err != nil {
 		return err
 	}
+	return nil
+}
 
-	_, err = cs.cartRepo.GetCardItem(cart.Id, productId)
+func (cs CartServiceImpl) GetBasket(userID int) (*domain2.Cart, error) {
+	cart, err := cs.cartRepo.GetByUserId(userID)
 	if err != nil {
-		return errors.New("Product not found in the basket")
+		return nil, err
 	}
-	return cs.cartRepo.DeleteProduct(cart.Id, productId)
+	return cart, nil
 }
 
 func (cs CartServiceImpl) AddProductToCart(userID, productID, quantity int) error {
@@ -40,7 +62,7 @@ func (cs CartServiceImpl) AddProductToCart(userID, productID, quantity int) erro
 		cart = &domain2.Cart{
 			UserId: userID,
 		}
-		err := cs.cartRepo.Create(cart)
+		_, err := cs.cartRepo.Create(cart)
 		if err != nil {
 			return err
 		}
@@ -63,16 +85,15 @@ func (cs CartServiceImpl) AddProductToCart(userID, productID, quantity int) erro
 	return err
 }
 
-func (cs CartServiceImpl) Create(req domain2.CartItems) error {
-	cart := &domain2.CartItems{
-		Id:        req.Id,
-		CartId:    req.CartId,
-		ProductId: req.ProductId,
-		Quantity:  req.Quantity,
-	}
-	_, err := cs.cartRepo.CreateCardItem(cart)
+func (cs CartServiceImpl) DeleteProductFromCart(userId, productId int) error {
+	cart, err := cs.cartRepo.GetByUserId(userId)
 	if err != nil {
 		return err
 	}
-	return nil
+
+	_, err = cs.cartRepo.GetCardItem(cart.Id, productId)
+	if err != nil {
+		return errors.New("Product not found in the basket")
+	}
+	return cs.cartRepo.DeleteProduct(cart.Id, productId)
 }
