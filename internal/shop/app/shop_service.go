@@ -6,7 +6,7 @@ import (
 
 type ShopService interface {
 	Create(domain.NewShop) (int, error)
-	GetShopById(int) (domain.Shop, error)
+	GetShopById(int) (*domain.Shop, error)
 	GetAllShops(int, int, string) ([]domain.Shop, error)
 }
 
@@ -57,7 +57,7 @@ func (s *shopService) Create(req domain.NewShop) (int, error) {
 	return s.repository.Save(req)
 }
 
-func (s *shopService) GetShopById(id int) (domain.Shop, error) {
+func (s *shopService) GetShopById(id int) (*domain.Shop, error) {
 	return s.repository.FindShopById(id)
 }
 

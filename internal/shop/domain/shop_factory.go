@@ -1,5 +1,7 @@
 package domain
 
+import "time"
+
 type ShopFactory struct {
 	maxNameLen      int
 	maxSearchLength int
@@ -34,4 +36,20 @@ func (f *ShopFactory) GetAllShopsInputValidate(limit, offset int, search string)
 	}
 
 	return nil
+}
+
+func (f *ShopFactory) ParseModelToDomain(
+	id int,
+	name string,
+	ownerId int,
+	createdAt time.Time,
+	updatedAt time.Time,
+) *Shop {
+	return &Shop{
+		id:        id,
+		name:      name,
+		ownerId:   ownerId,
+		createdAt: createdAt.Format(time.RFC1123),
+		updatedAt: updatedAt.Format(time.RFC1123),
+	}
 }

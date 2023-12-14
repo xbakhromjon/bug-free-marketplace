@@ -10,12 +10,11 @@ import (
 
 var (
 	shopTableName = "shop"
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
 )
 
 type shopPostgresRepo struct {
 	db *postgres.PostgresDB
+	f  domain.ShopFactory
 }
 
 func NewShopRepository(db *postgres.PostgresDB) domain.ShopRepository {
@@ -85,9 +84,15 @@ func (s *shopPostgresRepo) CheckShopNameExists(shopName string) (bool, error) {
 	return exists, nil
 }
 
-func (s *shopPostgresRepo) FindShopById(shopId int) (domain.Shop, error) {
-	shop := domain.Shop{}
-
+func (s *shopPostgresRepo) FindShopById(shopId int) (*domain.Shop, error) {
+	// shop := domain.Shop{}
+	var (
+		id        int
+		name      string
+		ownerId   int
+		createdAt time.Time
+		updatedAt time.Time
+	)
 	queryGetShopById := fmt.Sprintf(`
 	SELECT 
 		id,
@@ -108,26 +113,30 @@ func (s *shopPostgresRepo) FindShopById(shopId int) (domain.Shop, error) {
 		queryGetShopById,
 		shopId,
 	).Scan(
-		&shop.Id,
-		&shop.Name,
-		&shop.OwnerId,
-		&CreatedAt,
-		&UpdatedAt,
+		&id,
+		&name,
+		&ownerId,
+		&createdAt,
+		&updatedAt,
 	)
 
 	if err != nil {
-		return domain.Shop{}, err
+		return &domain.Shop{}, err
 	}
-
-	shop.CreatedAt = CreatedAt.Format(time.RFC3339)
-	shop.UpdatedAt = UpdatedAt.Format(time.RFC3339)
-
+	shop := s.f.ParseModelToDomain(id, name, ownerId, createdAt, updatedAt)
+	fmt.Println(shop)
 	return shop, nil
 }
 
 func (s *shopPostgresRepo) FindAllShops(limit, offset int, search string) ([]domain.Shop, error) {
 	shops := []domain.Shop{}
-
+	var (
+		id        int
+		name      string
+		ownerId   int
+		createdAt time.Time
+		updatedAt time.Time
+	)
 	queryGetAllShops := fmt.Sprint(`
 		SELECT 
 			id,
@@ -155,21 +164,18 @@ func (s *shopPostgresRepo) FindAllShops(limit, offset int, search string) ([]dom
 	defer row.Close()
 
 	for row.Next() {
-		shop := domain.Shop{}
 		err := row.Scan(
-			&shop.Id,
-			&shop.Name,
-			&shop.OwnerId,
-			&CreatedAt,
-			&UpdatedAt,
+			&id,
+			&name,
+			&ownerId,
+			&createdAt,
+			&updatedAt,
 		)
 		if err != nil {
 			return []domain.Shop{}, err
 		}
-		shop.CreatedAt = CreatedAt.Format(time.RFC1123)
-		shop.UpdatedAt = UpdatedAt.Format(time.RFC1123)
-
-		shops = append(shops, shop)
+		shop := s.f.ParseModelToDomain(id, name, ownerId, createdAt, updatedAt)
+		shops = append(shops, *shop)
 	}
 
 	return shops, nil

@@ -8,6 +8,7 @@ import (
 )
 
 type mockShopRepo struct {
+	f domain.ShopFactory
 }
 
 func newMockShopRepo() domain.ShopRepository {
@@ -32,18 +33,18 @@ func (m *mockShopRepo) CheckShopNameExists(shopName string) (bool, error) {
 	return false, nil
 }
 
-func (m *mockShopRepo) FindShopById(id int) (domain.Shop, error) {
+func (m *mockShopRepo) FindShopById(id int) (*domain.Shop, error) {
 	if id == 1 {
 		return newValidShop(), nil
 	}
-	return domain.Shop{}, domain.ErrShopNotFound
+	return &domain.Shop{}, domain.ErrShopNotFound
 }
 
 func (m *mockShopRepo) FindAllShops(limit, offset int, search string) ([]domain.Shop, error) {
 
-	if limit == 1 && offset == 1 && search == "Default" {
+	if limit == 1 && offset == 1 && search == "" {
 		return []domain.Shop{
-			newValidShop(),
+			*newValidShop(),
 		}, nil
 	}
 
@@ -169,14 +170,14 @@ func TestGetAllShops(t *testing.T) {
 
 	t.Run("GetAllShops successfully", func(t *testing.T) {
 		want := []domain.Shop{
-			newValidShop(),
+			*newValidShop(),
 		}
-		got, err := underTest.GetAllShops(1, 1, "Default")
+		got, err := underTest.GetAllShops(1, 1, "")
 
 		if err != nil {
 			t.Errorf("Didn`t expect error, but got %q", err)
 		} else if !reflect.DeepEqual(got, want) {
-			t.Errorf("Expected %q, but got %q", want, got)
+			t.Errorf("Expected %v, but got %v", want, got)
 		}
 	})
 
@@ -206,12 +207,13 @@ func TestGetAllShops(t *testing.T) {
 
 }
 
-func newValidShop() domain.Shop {
-	return domain.Shop{
-		Id:        1,
-		Name:      "Default shop name",
-		OwnerId:   1,
-		CreatedAt: time.Now().Format(time.RFC1123),
-		UpdatedAt: time.Now().Format(time.RFC1123),
-	}
+func newValidShop() *domain.Shop {
+	res := &domain.Shop{}
+	res.SetId(1)
+	res.SetName("Default")
+	res.SetOwnerId(1)
+	res.SetCreateAt(time.Now().Format(time.RFC1123))
+	res.SetUpdatedAt(time.Now().Format(time.RFC1123))
+	return res
+
 }

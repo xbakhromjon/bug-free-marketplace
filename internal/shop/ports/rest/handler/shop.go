@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"golang-project-template/internal/shop/app"
 	"golang-project-template/internal/shop/domain"
 	"log"
@@ -12,6 +11,14 @@ import (
 
 	"github.com/go-chi/chi/v5"
 )
+
+type ShopResponse struct {
+	Id        int    `json:"id"`
+	Name      string `json:"name"`
+	OwnerId   int    `json:"owner_id"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
+}
 
 type ShopHandler struct {
 	ShopService app.ShopService
@@ -45,6 +52,7 @@ func (h *ShopHandler) CreateShop(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jsonData)
+
 }
 
 func (h *ShopHandler) GetShopById(w http.ResponseWriter, r *http.Request) {
@@ -62,8 +70,14 @@ func (h *ShopHandler) GetShopById(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to get the shop by given id", http.StatusInternalServerError)
 		return
 	}
+	shopResponse := ShopResponse{}
+	shopResponse.Id = shop.GetId()
+	shopResponse.Name = shop.GetName()
+	shopResponse.OwnerId = shop.GetOwnerId()
+	shopResponse.CreatedAt = shop.GetCreatedAt()
+	shopResponse.UpdatedAt = shop.GetUpdatedAt()
 
-	jsonData, err := json.Marshal(shop)
+	jsonData, err := json.Marshal(shopResponse)
 
 	if err != nil {
 		log.Printf("Error marshalling the shop:  %v", err)
@@ -78,14 +92,13 @@ func (h *ShopHandler) GetShopById(w http.ResponseWriter, r *http.Request) {
 
 func (h *ShopHandler) GetAllShops(w http.ResponseWriter, r *http.Request) {
 
-	limit, err := strconv.Atoi(r.URL.Query().Get("limit"))
+	limit, err := ParseLimitQuery(r.URL.Query().Get("limit"))
 	if err != nil {
 		log.Printf("Error parsing limit: %v", err)
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
-
-	offset, err := strconv.Atoi(r.URL.Query().Get("offset"))
+	offset, err := ParseOffsetQuery(r.URL.Query().Get("offset"))
 	if err != nil {
 		log.Printf("Error parsing offset: %v", err)
 		http.Error(w, "Bad Request", http.StatusBadRequest)
@@ -94,7 +107,6 @@ func (h *ShopHandler) GetAllShops(w http.ResponseWriter, r *http.Request) {
 
 	search := r.URL.Query().Get("search")
 
-	fmt.Println(limit, offset, search)
 	shops, err := h.ShopService.GetAllShops(limit, offset, search)
 	if err != nil {
 		log.Printf("Error while getting all shops: %v", err)
@@ -102,14 +114,51 @@ func (h *ShopHandler) GetAllShops(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jsonData, err := json.Marshal(shops)
+	res := []ShopResponse{}
+	for _, shop := range shops {
+		shopResponse := ShopResponse{}
+
+		shopResponse.Id = shop.GetId()
+		shopResponse.Name = shop.GetName()
+		shopResponse.OwnerId = shop.GetOwnerId()
+		shopResponse.CreatedAt = shop.GetCreatedAt()
+		shopResponse.UpdatedAt = shop.GetUpdatedAt()
+
+		res = append(res, shopResponse)
+	}
+	jsonData, err := json.Marshal(res)
 	if err != nil {
 		log.Printf("Error marshalling the shops:  %v", err)
 		http.Error(w, "Failed to marshall all shops", http.StatusInternalServerError)
 		return
 	}
-
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jsonData)
+}
+
+func ParseLimitQuery(limit string) (int, error) {
+	if limit == "" {
+		return 10, nil
+	}
+	limitInt, err := strconv.Atoi(limit)
+	if err != nil {
+		return 0, err
+	}
+
+	return limitInt, nil
+
+}
+
+func ParseOffsetQuery(offset string) (int, error) {
+	if offset == "" {
+		return 1, nil
+	}
+	offsetInt, err := strconv.Atoi(offset)
+	if err != nil {
+		return 0, err
+	}
+
+	return offsetInt, nil
+
 }

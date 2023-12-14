@@ -3,7 +3,7 @@ package domain
 type ShopRepository interface {
 	Save(shop NewShop) (int, error)
 	CheckShopNameExists(string) (bool, error)
-	FindShopById(int) (Shop, error)
+	FindShopById(int) (*Shop, error)
 	FindAllShops(int, int, string) ([]Shop, error)
 }
 
