@@ -30,12 +30,19 @@ func NewUserUsecase(userRepository domain.UserRepository) UserUsecase {
 
 func (u *userUsecase) RegisterMerchantUser(newUser *domain.NewUser) (int, error) {
 	userFromFactory := u.f.CreateMerchantUser(newUser)
+
+	//validate user input
 	err := validateUserInfoForRegister(
 		userFromFactory.GetName(),
 		userFromFactory.GetPhoneNumber(),
 		userFromFactory.GetPassword(),
 	)
 	if err != nil {
+		return 0, err
+	}
+	err = validatePhoneNumberCount(newUser.PhoneNumber)
+	if err != nil {
+		log.Println("error: phone number count is more than 12")
 		return 0, err
 	}
 
@@ -63,11 +70,17 @@ func (u *userUsecase) RegisterMerchantUser(newUser *domain.NewUser) (int, error)
 func (u *userUsecase) RegisterCustomer(newUser *domain.NewUser) (int, error) {
 	userFromFactory := u.f.CreateCustomerUser(newUser)
 
+	//validate user input
 	err := validateUserInfoForRegister(
 		userFromFactory.GetName(),
 		userFromFactory.GetPhoneNumber(),
 		userFromFactory.GetPassword())
 	if err != nil {
+		return 0, err
+	}
+	err = validatePhoneNumberCount(newUser.PhoneNumber)
+	if err != nil {
+		log.Println("error: phone number count is more than 12")
 		return 0, err
 	}
 
@@ -94,11 +107,18 @@ func (u *userUsecase) RegisterCustomer(newUser *domain.NewUser) (int, error) {
 
 func (u *userUsecase) RegisterAdmin(newUser *domain.NewUser) (int, error) {
 	userFromFactory := u.f.CreateAdminUser(newUser)
+
+	//validate user input
 	err := validateUserInfoForRegister(
 		userFromFactory.GetName(),
 		userFromFactory.GetPhoneNumber(),
 		userFromFactory.GetPassword())
 	if err != nil {
+		return 0, err
+	}
+	err = validatePhoneNumberCount(newUser.PhoneNumber)
+	if err != nil {
+		log.Println("error: phone number count is more than 12")
 		return 0, err
 	}
 

@@ -1,6 +1,7 @@
 package app
 
 import (
+	"errors"
 	"golang-project-template/internal/users/domain"
 	"regexp"
 	"strings"
@@ -51,5 +52,12 @@ func validateUserInfoForLogin(phoneNumber, password string) error {
 		return domain.ErrInvalidCredentials
 	}
 
+	return nil
+}
+
+func validatePhoneNumberCount(phoneNumber string) error {
+	if len(phoneNumber) > 12 {
+		return errors.New("phone number count is more than 12")
+	}
 	return nil
 }
