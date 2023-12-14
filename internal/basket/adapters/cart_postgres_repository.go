@@ -9,7 +9,6 @@ import (
 
 type cartRepo struct {
 	db *pgx.Conn
-	cf domain2.CartFactory
 }
 
 func (c cartRepo) GetCardItem(cartId, productId int) (*domain2.CartItems, error) {
@@ -34,12 +33,12 @@ func (c cartRepo) CreateCardItem(cart *domain2.CartItems) (int, error) {
 	return cart.Id, nil
 }
 
-func (c cartRepo) Create(cart *domain2.Cart) error {
+func (c cartRepo) Create(cart *domain2.Cart) (int, error) {
 	_, err := c.db.Exec("INSERT INTO cart(user_id)VALUES (?)", cart.UserId)
 	if err != nil {
-		return err
+		return 0, err
 	}
-	return nil
+	return cart.Id, nil
 }
 
 func (c cartRepo) GetById(id int) (*domain2.CartItems, error) {

@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"golang-project-template/internal/basket/app"
 	"net/http"
+	"strconv"
 )
 
 type CartController struct {
@@ -38,4 +39,32 @@ func (cc *CartController) GetBasket(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"cart": cart})
+}
+
+func (cc *CartController) AddProductToCart(c *gin.Context) {
+	userId, err := getUserIdFromContext(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user id"})
+		return
+	}
+
+	productId, err := strconv.Atoi(c.Param("product_id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product id"})
+		return
+	}
+
+	quantity, err := strconv.Atoi(c.Param("quantity"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid quantity"})
+		return
+	}
+
+	updateBasket, err := cc.cartUseCase.AddProductToCart(userId, productId, quantity)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add product to the cart"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"cart": updateBasket})
 }

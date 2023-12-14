@@ -10,7 +10,7 @@ type CartService interface {
 	CreateCartItem(req domain2.CartItems) error
 	CreateCart(userID int) (int, error)
 	GetBasket(userID int) (*domain2.Cart, error)
-	AddProductToCart(userID, productID, quantity int) error
+	AddProductToCart(userID, productID, quantity int) (*domain2.Cart, error)
 	DeleteProductFromCart(userId, productId int) error
 }
 
@@ -56,7 +56,7 @@ func (cs CartServiceImpl) GetBasket(userID int) (*domain2.Cart, error) {
 	return cart, nil
 }
 
-func (cs CartServiceImpl) AddProductToCart(userID, productID, quantity int) error {
+func (cs CartServiceImpl) AddProductToCart(userID, productID, quantity int) (*domain2.Cart, error) {
 	cart, err := cs.cartRepo.GetByUserId(userID)
 	if err != nil {
 		cart = &domain2.Cart{
@@ -64,7 +64,7 @@ func (cs CartServiceImpl) AddProductToCart(userID, productID, quantity int) erro
 		}
 		_, err := cs.cartRepo.Create(cart)
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
 
@@ -76,13 +76,22 @@ func (cs CartServiceImpl) AddProductToCart(userID, productID, quantity int) erro
 			Quantity:  quantity,
 		}
 		_, err := cs.cartRepo.CreateCardItem(cardItem)
-		return err
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		cardItem.Quantity = quantity
+		err = cs.cartRepo.UpdateCartItem(userID, productID, quantity)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	// Case: if product already exixts in basket, update the quantity
-	cardItem.Quantity += quantity
-	err = cs.cartRepo.UpdateCartItem(userID, productID, cardItem.Quantity)
-	return err
+	updatedCart, err := cs.cartRepo.GetByUserId(userID)
+	if err != nil {
+		return nil, err
+	}
+	return updatedCart, nil
 }
 
 func (cs CartServiceImpl) DeleteProductFromCart(userId, productId int) error {
