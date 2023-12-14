@@ -13,6 +13,7 @@ type ProductRepository interface {
 	Save(product *Product) (int, error)
 	FindById(id int) (*Product, error)
 	FindAllByShopId(shopId int) ([]*Product, error)
+	UpdateProduct(productID int, product *Product) (*Product, error)
 }
 
 const (
