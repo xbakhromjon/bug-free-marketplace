@@ -52,6 +52,7 @@ func (c *UserController) RegisterAdminUserHandler(w http.ResponseWriter, r *http
 	}
 
 	//writing to the HEADER
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(id)
 }
@@ -74,6 +75,7 @@ func (c *UserController) RegisterCustomerHandler(w http.ResponseWriter, r *http.
 	}
 
 	//writing to the HEADER
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(id)
 }
@@ -96,6 +98,7 @@ func (c *UserController) RegisterMerchantHandler(w http.ResponseWriter, r *http.
 	}
 
 	//writing to the HEADER
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(id)
 }
@@ -124,6 +127,8 @@ func (c *UserController) LoginUserHandler(w http.ResponseWriter, r *http.Request
 		response := map[string]string{
 			"access_token": token,
 		}
+
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(response)
 	} else {
@@ -133,7 +138,8 @@ func (c *UserController) LoginUserHandler(w http.ResponseWriter, r *http.Request
 }
 
 func (c *UserController) GetUserByPhoneNumberHandler(w http.ResponseWriter, r *http.Request) {
-	phoneNumber := chi.URLParam(r, "pn")
+
+	phoneNumber := chi.URLParam(r, "phone_number")
 	var newUser userObject
 
 	user, err := c.userUsecase.GetUserByPhoneNumber(phoneNumber)
@@ -151,6 +157,7 @@ func (c *UserController) GetUserByPhoneNumberHandler(w http.ResponseWriter, r *h
 	newUser.UpdatedAt = user.GetUpdatedAt()
 	newUser.DeletedAt = user.GetDeletedAt()
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(&newUser)
 
