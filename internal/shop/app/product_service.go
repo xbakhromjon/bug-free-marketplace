@@ -51,9 +51,10 @@ func (p *productService) Filter(searchModel domain.ProductSearchModel) ([]*domai
 }
 
 func (p *productService) FilterByPageable(searchModel domain.ProductSearchModel, pageable common.PageableRequest) (*common.PageableResult[domain.Product], error) {
-	result, err := p.repository.FindAllWithPageable(searchModel, pageable)
+	content, totalCount, err := p.repository.FindAllWithPageable(searchModel, pageable)
 	if err != nil {
 		return nil, err
 	}
-	return result, nil
+	pageableResult := common.CreatePageableResult(content, totalCount)
+	return pageableResult, nil
 }

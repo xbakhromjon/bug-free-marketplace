@@ -54,7 +54,7 @@ func TestFilter(t *testing.T) {
 
 func TestFilterByPageable(t *testing.T) {
 	underTest := productService{repository: newMockProductRepo()}
-	t.Run("result proper with repository returned result", func(t *testing.T) {
+	t.Run("result proper with that repository returned result", func(t *testing.T) {
 		searchModel := *underTest.factory.CreateNewSearchModel("T-shirt", 10, 20)
 		pageableRequest := *common.CreateDefaultPageableRequest()
 		got, err := underTest.FilterByPageable(searchModel, pageableRequest)
@@ -62,8 +62,8 @@ func TestFilterByPageable(t *testing.T) {
 			t.Errorf("expected ok but %q error occured", err)
 		}
 
-		want, _ := underTest.repository.FindAllWithPageable(searchModel, pageableRequest)
-
+		content, totalCount, _ := underTest.repository.FindAllWithPageable(searchModel, pageableRequest)
+		want := common.CreatePageableResult(content, totalCount)
 		if !reflect.DeepEqual(want, got) {
 			t.Errorf("want %+v but got %+v", want, got)
 		}
@@ -100,9 +100,9 @@ func (m *mockProductRepo) FindAll(searchModel domain.ProductSearchModel) ([]*dom
 	return resp, nil
 }
 
-func (m *mockProductRepo) FindAllWithPageable(searchModel domain.ProductSearchModel, pageable common.PageableRequest) (*common.PageableResult[domain.Product], error) {
-	result := newValidProductPageableResult("T-shirt")
-	return result, nil
+func (m *mockProductRepo) FindAllWithPageable(searchModel domain.ProductSearchModel, pageable common.PageableRequest) ([]*domain.Product, int, error) {
+	result := newValidProductListWithName("T-shirt")
+	return result, 1, nil
 }
 
 func newValidProduct() *domain.Product {
@@ -122,14 +122,4 @@ func newValidProductListWithName(name string) []*domain.Product {
 		ShopId: 1,
 	}}
 	return list
-}
-
-func newValidProductPageableResult(name string) *common.PageableResult[domain.Product] {
-	content := []domain.Product{{
-		Id:     1,
-		Name:   name,
-		Price:  100,
-		ShopId: 1,
-	}}
-	return common.CreatePageableResult(content, 1)
 }

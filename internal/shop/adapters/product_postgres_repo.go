@@ -85,7 +85,7 @@ func (p *productPostgresRepo) FindAll(searchModel domain.ProductSearchModel) ([]
 	return result, nil
 }
 
-func (p *productPostgresRepo) FindAllWithPageable(searchModel domain.ProductSearchModel, pageable common.PageableRequest) (*common.PageableResult[domain.Product], error) {
+func (p *productPostgresRepo) FindAllWithPageable(searchModel domain.ProductSearchModel, pageable common.PageableRequest) ([]domain.Product, int, error) {
 	products := sq.Select("p.id, p.name, p.price, p.shop_id").From("product p")
 	productsCount := sq.Select("count(p.id) totalCount").From("product p")
 
@@ -98,13 +98,13 @@ func (p *productPostgresRepo) FindAllWithPageable(searchModel domain.ProductSear
 	var totalCount int
 	err := countRow.Scan(&totalCount)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	// execute filter query
 	rows, err := products.Query()
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	var result []domain.Product
 
@@ -113,13 +113,12 @@ func (p *productPostgresRepo) FindAllWithPageable(searchModel domain.ProductSear
 		var product domain.Product
 		err := rows.Scan(&product.Id, &product.Name, &product.Price, &product.ShopId)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		result = append(result, product)
 	}
 
-	pageableResult := common.CreatePageableResult(result, totalCount)
-	return pageableResult, nil
+	return result, totalCount, nil
 }
 
 func BuildProductFilterQuery(base sq.SelectBuilder, searchModel domain.ProductSearchModel) {

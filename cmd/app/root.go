@@ -3,7 +3,6 @@ package app
 import (
 	"fmt"
 	"github.com/spf13/cobra"
-	"golang-project-template/internal/common"
 	"os"
 )
 
@@ -12,7 +11,6 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Application entrypoint...
 
-		common.SetUpEnv()
 		fmt.Println("hello world")
 
 		// remove it when you run http/grpc server

@@ -21,7 +21,7 @@ type ProductRepository interface {
 	FindById(id int) (*Product, error)
 	FindAllByShopId(shopId int) ([]*Product, error)
 	FindAll(model ProductSearchModel) ([]*Product, error)
-	FindAllWithPageable(searchModel ProductSearchModel, pageable common.PageableRequest) (*common.PageableResult[Product], error)
+	FindAllWithPageable(searchModel ProductSearchModel, pageable common.PageableRequest) ([]*Product, int, error)
 }
 
 const (
