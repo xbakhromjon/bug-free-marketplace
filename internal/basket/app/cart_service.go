@@ -12,6 +12,8 @@ type CartService interface {
 	GetBasket(userID int) (*domain2.Cart, error)
 	AddProductToCart(userID, productID, quantity int) (*domain2.Cart, error)
 	DeleteProductFromCart(userId, productId int) error
+	IncrementProductQuantity(userId, productId int) error
+	DecrementProductQuantity(userId, productId int) error
 }
 
 func NewCartService(repo domain2.CartRepository) CartService {
@@ -56,6 +58,29 @@ func (cs CartServiceImpl) GetBasket(userID int) (*domain2.Cart, error) {
 	return cart, nil
 }
 
+func (cs CartServiceImpl) UpdateProductQuantity(userId, productId, quantity int) error {
+	cart, err := cs.cartRepo.GetByUserId(userId)
+	if err != nil {
+		return err
+	}
+	cardItem, err := cs.cartRepo.GetCardItem(cart.Id, productId)
+	if err != nil {
+		return err
+	}
+
+	newQuantity := cardItem.Quantity + quantity
+
+	if newQuantity < 0 {
+		newQuantity = 0
+	}
+	cardItem.Quantity = newQuantity
+	err = cs.cartRepo.UpdateCartItem(userId, productId, cardItem.Quantity)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (cs CartServiceImpl) AddProductToCart(userID, productID, quantity int) (*domain2.Cart, error) {
 	cart, err := cs.cartRepo.GetByUserId(userID)
 	if err != nil {
@@ -68,30 +93,31 @@ func (cs CartServiceImpl) AddProductToCart(userID, productID, quantity int) (*do
 		}
 	}
 
-	cardItem, err := cs.cartRepo.GetCardItem(cart.Id, productID)
+	_, err = cs.cartRepo.GetCart(cart.Id)
 	if err != nil {
-		cardItem = &domain2.CartItems{
+		cartItem := &domain2.CartItems{
 			CartId:    cart.Id,
 			ProductId: productID,
 			Quantity:  quantity,
 		}
-		_, err := cs.cartRepo.CreateCardItem(cardItem)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		cardItem.Quantity = quantity
-		err = cs.cartRepo.UpdateCartItem(userID, productID, quantity)
+		_, err := cs.cartRepo.CreateCardItem(cartItem)
 		if err != nil {
 			return nil, err
 		}
 	}
-
 	updatedCart, err := cs.cartRepo.GetByUserId(userID)
 	if err != nil {
 		return nil, err
 	}
 	return updatedCart, nil
+}
+
+func (cs CartServiceImpl) IncrementProductQuantity(userId, productId int) error {
+	return cs.UpdateProductQuantity(userId, productId, +1)
+}
+
+func (cs CartServiceImpl) DecrementProductQuantity(userId, productId int) error {
+	return cs.UpdateProductQuantity(userId, productId, -1)
 }
 
 func (cs CartServiceImpl) DeleteProductFromCart(userId, productId int) error {

@@ -65,6 +65,43 @@ func (cc *CartController) AddProductToCart(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add product to the cart"})
 		return
 	}
-
 	c.JSON(http.StatusOK, gin.H{"cart": updateBasket})
+}
+
+func (cc *CartController) IncrementProductQuantity(c *gin.Context) {
+	userId, err := getUserIdFromContext(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user id"})
+		return
+	}
+
+	productId, err := strconv.Atoi(c.Param("product_id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product id"})
+	}
+
+	err = cc.cartUseCase.IncrementProductQuantity(userId, productId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to increment quantity"})
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Quantity is incremented"})
+}
+
+func (cc *CartController) DecrementProductQuantity(c *gin.Context) {
+	userId, err := getUserIdFromContext(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user id"})
+	}
+
+	productId, err := strconv.Atoi(c.Param("product_id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product id"})
+	}
+
+	err = cc.cartUseCase.DecrementProductQuantity(userId, productId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to decrement"})
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Quantity is decremented"})
 }

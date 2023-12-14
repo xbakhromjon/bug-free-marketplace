@@ -41,17 +41,17 @@ func (c cartRepo) Create(cart *domain2.Cart) (int, error) {
 	return cart.Id, nil
 }
 
-func (c cartRepo) GetById(id int) (*domain2.CartItems, error) {
-	row := c.db.QueryRow("select id,cart_id,product_id,quantity from cart_items where id = ?", id)
-	var basket domain2.CartItems
-	err := row.Scan(&basket.Id, &basket.CartId, &basket.ProductId, &basket.Quantity)
+func (c cartRepo) GetCart(id int) (*domain2.Cart, error) {
+	row := c.db.QueryRow("select id,user_id from cart where id = ?", id)
+	var cart domain2.Cart
+	err := row.Scan(&cart.Id, &cart.UserId)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errors.New("Basket not found")
+			return nil, errors.New("Cart not found")
 		}
 		return nil, err
 	}
-	return &basket, nil
+	return &cart, nil
 }
 
 func (c cartRepo) GetByUserId(userID int) (*domain2.Cart, error) {
@@ -68,7 +68,7 @@ func (c cartRepo) GetByUserId(userID int) (*domain2.Cart, error) {
 }
 
 func (c cartRepo) UpdateCartItem(userId, productId, quantity int) error {
-	_, err := c.db.Exec("UPDATE cart_items SET quantity = quantity + ? WHERE user_id = ? AND product_id = ?",
+	_, err := c.db.Exec("UPDATE cart_items SET quantity = ? WHERE user_id = ? AND product_id = ?",
 		quantity, userId, productId)
 	if err != nil {
 		return err
