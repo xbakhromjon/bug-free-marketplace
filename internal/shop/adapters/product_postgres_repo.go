@@ -85,7 +85,7 @@ func (p *productPostgresRepo) FindAll(searchModel domain.ProductSearchModel) ([]
 	return result, nil
 }
 
-func (p *productPostgresRepo) FindAllWithPageable(searchModel domain.ProductSearchModel, pageable common.PageableRequest) ([]domain.Product, int, error) {
+func (p *productPostgresRepo) FindAllWithPageable(searchModel domain.ProductSearchModel, pageable common.PageableRequest) ([]*domain.Product, int, error) {
 	products := sq.Select("p.id, p.name, p.price, p.shop_id").From("product p")
 	productsCount := sq.Select("count(p.id) totalCount").From("product p")
 
@@ -106,7 +106,7 @@ func (p *productPostgresRepo) FindAllWithPageable(searchModel domain.ProductSear
 	if err != nil {
 		return nil, 0, err
 	}
-	var result []domain.Product
+	var result []*domain.Product
 
 	// scan rows and add to result
 	for rows.Next() {
@@ -115,7 +115,7 @@ func (p *productPostgresRepo) FindAllWithPageable(searchModel domain.ProductSear
 		if err != nil {
 			return nil, 0, err
 		}
-		result = append(result, product)
+		result = append(result, &product)
 	}
 
 	return result, totalCount, nil

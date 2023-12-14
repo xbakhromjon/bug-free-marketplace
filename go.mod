@@ -4,6 +4,7 @@ go 1.21.1
 
 require (
 	github.com/go-chi/chi/v5 v5.0.10
+	github.com/go-chi/render v1.0.3
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/jackc/pgx v3.6.2+incompatible
 	github.com/jackc/pgx/v5 v5.5.1
@@ -25,7 +26,6 @@ require (
 
 require (
 	github.com/ajg/form v1.5.1 // indirect
-	github.com/go-chi/render v1.0.3 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jackc/fake v0.0.0-20150926172116-812a484cc733 // indirect
 	github.com/lib/pq v1.10.2 // indirect

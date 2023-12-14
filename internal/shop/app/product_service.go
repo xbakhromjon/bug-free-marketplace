@@ -10,7 +10,7 @@ type ProductService interface {
 	GetOne(id int) (*domain.Product, error)
 	GetAllByShopId(shopId int) ([]*domain.Product, error)
 	Filter(searchModel domain.ProductSearchModel) ([]*domain.Product, error)
-	FilterByPageable(searchModel domain.ProductSearchModel, pageable common.PageableRequest) (*common.PageableResult[domain.Product], error)
+	FilterByPageable(searchModel domain.ProductSearchModel, pageable common.PageableRequest) (*common.PageableResult[*domain.Product], error)
 }
 
 func NewProductService(repository domain.ProductRepository, factory domain.ProductFactory) ProductService {
@@ -50,7 +50,7 @@ func (p *productService) Filter(searchModel domain.ProductSearchModel) ([]*domai
 	return products, nil
 }
 
-func (p *productService) FilterByPageable(searchModel domain.ProductSearchModel, pageable common.PageableRequest) (*common.PageableResult[domain.Product], error) {
+func (p *productService) FilterByPageable(searchModel domain.ProductSearchModel, pageable common.PageableRequest) (*common.PageableResult[*domain.Product], error) {
 	content, totalCount, err := p.repository.FindAllWithPageable(searchModel, pageable)
 	if err != nil {
 		return nil, err
