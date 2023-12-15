@@ -37,7 +37,7 @@ func (s *shopService) Create(req domain.NewShop) (int, error) {
 		return 0, err
 	}
 
-	ok, err := s.userRepository.UserExists(req.OwnerId)
+	ok, err := s.userRepository.UserExists(req.GetOwnerId())
 	if err != nil {
 		return 0, err
 	}
@@ -45,7 +45,7 @@ func (s *shopService) Create(req domain.NewShop) (int, error) {
 		return 0, domain.ErrUserNotExists
 	}
 
-	shopNameExists, err := s.repository.CheckShopNameExists(req.Name)
+	shopNameExists, err := s.repository.CheckShopNameExists(req.GetName())
 	if err != nil {
 		return 0, err
 	}

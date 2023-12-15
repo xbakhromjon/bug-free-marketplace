@@ -16,7 +16,7 @@ func newMockShopRepo() domain.ShopRepository {
 }
 
 func (m *mockShopRepo) Save(shop domain.NewShop) (int, error) {
-	if shop.Name == "" {
+	if shop.GetName() == "" {
 		return 0, domain.ErrEmptyShopName
 	}
 
@@ -71,7 +71,7 @@ func TestCreateShop(t *testing.T) {
 
 	t.Run("Create Shop successfully", func(t *testing.T) {
 		got, err := underTest.Create(
-			domain.NewShop{Name: "testing shop name", OwnerId: 1},
+			domain.MakeNewShop("testing shop name", 1),
 		)
 		want := 1
 		if err != nil {
@@ -89,34 +89,22 @@ func TestCreateShop(t *testing.T) {
 	}{
 		{
 			"empty shop name",
-			domain.NewShop{
-				Name:    "",
-				OwnerId: 1,
-			},
+			domain.MakeNewShop("", 1),
 			domain.ErrEmptyShopName,
 		},
 		{
 			"shop name exists",
-			domain.NewShop{
-				Name:    "existing_shop",
-				OwnerId: 1,
-			},
+			domain.MakeNewShop("existing shop", 1),
 			domain.ErrShopNameExists,
 		},
 		{
 			"invalid shop name",
-			domain.NewShop{
-				Name:    "shop name that contains more than 20 chars",
-				OwnerId: 1,
-			},
+			domain.MakeNewShop("shop name that contains more than 20 chars", 1),
 			domain.ErrInvalidShopName,
 		},
 		{
 			"no such user",
-			domain.NewShop{
-				Name:    "random shop name",
-				OwnerId: 99,
-			},
+			domain.MakeNewShop("random shop name", 1),
 			domain.ErrUserNotExists,
 		},
 	}

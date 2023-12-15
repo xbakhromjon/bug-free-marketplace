@@ -38,8 +38,8 @@ func (s *shopPostgresRepo) Save(shop domain.NewShop) (int, error) {
 	err := s.db.QueryRow(
 		context.Background(),
 		createShopQuery,
-		shop.Name,
-		shop.OwnerId,
+		shop.GetName(),
+		shop.GetOwnerId(),
 	).Scan(
 		&id,
 	)

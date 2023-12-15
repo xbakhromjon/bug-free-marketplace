@@ -12,11 +12,11 @@ func NewShopFactory(maxNameLen, maxSearchLength int) ShopFactory {
 }
 
 func (f *ShopFactory) Validate(shop NewShop) error {
-	if shop.Name == "" {
+	if shop.GetName() == "" {
 		return ErrEmptyShopName
 	}
 
-	if len(shop.Name) > f.maxNameLen {
+	if len(shop.GetName()) > f.maxNameLen {
 		return ErrInvalidShopName
 	}
 	return nil
