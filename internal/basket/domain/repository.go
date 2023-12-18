@@ -7,5 +7,6 @@ type CartRepository interface {
 	UpdateCartItem(userId, productId, quantity int) error
 	DeleteProduct(cardId, productId int) error
 	GetByUserId(userID int) (*Cart, error)
-	GetCardItem(cartId, productId int) (*CartItems, error)
+	GetCardItem(cartId int) (*CartItems, error)
+	GetCartItemByCartIdAndProductId(cartId, productId int) (*CartItems, error)
 }

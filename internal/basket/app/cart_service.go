@@ -9,6 +9,7 @@ type CartService interface {
 	CreateCartItem(req basket.CartItems) error
 	CreateCart(userID int) (int, error)
 	GetBasket(userID int) (*basket.Cart, error)
+	GetBasketItem(cartId int) (*basket.CartItems, error)
 	AddProductToCart(userID, productID, quantity int) (*basket.Cart, error)
 	DeleteProductFromCart(userId, productId int) error
 	IncrementProductQuantity(userId, productId int) error
@@ -57,12 +58,20 @@ func (cs CartServiceImpl) GetBasket(userID int) (*basket.Cart, error) {
 	return cart, nil
 }
 
+func (cs CartServiceImpl) GetBasketItem(cartId int) (*basket.CartItems, error) {
+	cItems, err := cs.cartRepo.GetCardItem(cartId)
+	if err != nil {
+		return nil, basket.ErrCartItemNotFound
+	}
+	return cItems, nil
+}
+
 func (cs CartServiceImpl) UpdateProductQuantity(userId, productId, quantity int) error {
 	cart, err := cs.cartRepo.GetByUserId(userId)
 	if err != nil {
 		return basket.ErrCartNotFound
 	}
-	cardItem, err := cs.cartRepo.GetCardItem(cart.Id, productId)
+	cardItem, err := cs.cartRepo.GetCartItemByCartIdAndProductId(cart.Id, productId)
 	if err != nil {
 		return basket.ErrProductNotFound
 	}
@@ -122,7 +131,7 @@ func (cs CartServiceImpl) DeleteProductFromCart(userId, productId int) error {
 	if err != nil {
 		return basket.ErrCartNotFound
 	}
-	_, err = cs.cartRepo.GetCardItem(cart.Id, productId)
+	_, err = cs.cartRepo.GetCartItemByCartIdAndProductId(cart.Id, productId)
 	if err != nil {
 		return basket.ErrProductNotFound
 	}
