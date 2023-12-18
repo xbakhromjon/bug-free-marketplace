@@ -2,6 +2,7 @@ package main
 
 import (
 	"golang-project-template/internal/common"
+	"golang-project-template/internal/pkg/jwt"
 	shopAdapters "golang-project-template/internal/shop/adapters"
 	service "golang-project-template/internal/shop/app"
 	"golang-project-template/internal/shop/domain"
@@ -66,7 +67,7 @@ func httpServer() *chi.Mux {
 			r.Post("/register-merchant/", userHandler.RegisterMerchantHandler)
 			r.Post("/register-customer/", userHandler.RegisterCustomerHandler)
 			r.Post("/login/", userHandler.LoginUserHandler)
-			r.Get("/get-user/{phone_number}", userHandler.GetUserByPhoneNumberHandler)
+			r.With(jwt.AuthMiddleWare).Get("/get-user/{phone_number}", userHandler.GetUserByPhoneNumberHandler)
 		})
 
 		r.Route("/shop", func(r chi.Router) {

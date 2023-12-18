@@ -33,7 +33,7 @@ func VerifyToken(token string) (jwt.MapClaims, error) {
 			return nil, errors.New("invalid token")
 		}
 
-		return jwtSecretKey, nil
+		return []byte(jwtSecretKey), nil
 	}
 
 	jwtToken, err := jwt.Parse(token, keyFunc)
@@ -43,12 +43,12 @@ func VerifyToken(token string) (jwt.MapClaims, error) {
 				return nil, errors.New("expired token")
 			}
 		}
-		return nil, errors.New("invalid token")
+		return nil, errors.New(err.Error())
 	}
 
 	claims, ok := jwtToken.Claims.(jwt.MapClaims)
 	if !ok {
-		return nil, errors.New("invalid token")
+		return nil, errors.New(err.Error())
 	}
 
 	return claims, nil
