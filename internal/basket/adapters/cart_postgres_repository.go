@@ -4,74 +4,73 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/jackc/pgx"
-	domain2 "golang-project-template/internal/basket/domain"
+	basket "golang-project-template/internal/basket/domain"
 )
 
 type cartRepo struct {
 	db *pgx.Conn
 }
 
-func (c cartRepo) GetCardItem(cartId, productId int) (*domain2.CartItems, error) {
+func (c cartRepo) GetCardItem(cartId, productId int) (*basket.CartItems, error) {
 	row := c.db.QueryRow("SELECT id, cart_id, product_id, quantity from card_items WHERE cart_id = ? AND product_id = ?", cartId, productId)
-	var cartItems domain2.CartItems
+	var cartItems basket.CartItems
 	err := row.Scan(&cartItems.Id, &cartItems.CartId, &cartItems.ProductId, &cartItems.Quantity)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errors.New("CartItem not found")
+			return nil, basket.ErrCartItemNotFound
 		}
-		return nil, err
 	}
 	return &cartItems, nil
 }
 
-func (c cartRepo) CreateCardItem(cart *domain2.CartItems) (int, error) {
-	_, err := c.db.Exec("INSERT INTO cart_items(cart_id,product_id, quantity) VALUES (?,?,?,?)",
+func (c cartRepo) CreateCardItem(cart *basket.CartItems) (int, error) {
+	_, err := c.db.Exec("INSERT INTO cart_items(cart_id,product_id, quantity) VALUES (?,?,?,?) RETURNING id",
 		cart.CartId, cart.CartId, cart.ProductId, cart.Quantity)
 	if err != nil {
-		return 0, err
+		return 0, basket.ErrCartItemCreationFailed
 	}
 	return cart.Id, nil
 }
 
-func (c cartRepo) Create(cart *domain2.Cart) (int, error) {
-	_, err := c.db.Exec("INSERT INTO cart(user_id)VALUES (?)", cart.UserId)
+func (c cartRepo) Create(cart *basket.Cart) (int, error) {
+	_, err := c.db.Exec("INSERT INTO cart(user_id)VALUES (?) RETURNING id", cart.UserId)
 	if err != nil {
-		return 0, err
+		return 0, basket.ErrCartCreationFailed
 	}
 	return cart.Id, nil
 }
 
-func (c cartRepo) GetCart(id int) (*domain2.Cart, error) {
+func (c cartRepo) GetCart(id int) (*basket.Cart, error) {
 	row := c.db.QueryRow("select id,user_id from cart where id = ?", id)
-	var cart domain2.Cart
+	var cart basket.Cart
 	err := row.Scan(&cart.Id, &cart.UserId)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errors.New("Cart not found")
+			return nil, basket.ErrCartNotFound
 		}
 		return nil, err
 	}
 	return &cart, nil
 }
 
-func (c cartRepo) GetByUserId(userID int) (*domain2.Cart, error) {
+func (c cartRepo) GetByUserId(userID int) (*basket.Cart, error) {
 	row := c.db.QueryRow("select id,user_id from carts where user_id = ?", userID)
-	var cart domain2.Cart
+	var cart basket.Cart
 	err := row.Scan(&cart.Id, &cart.UserId)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errors.New("Cart not found")
+			return nil, basket.ErrCartNotFound
 		}
 		return nil, err
 	}
 	return &cart, err
 }
 
-func (c cartRepo) UpdateCartItem(userId, productId, quantity int) error {
-	_, err := c.db.Exec("UPDATE cart_items SET quantity = ? WHERE user_id = ? AND product_id = ?",
-		quantity, userId, productId)
+func (c cartRepo) UpdateCartItem(cartId, productId, quantity int) error {
+	_, err := c.db.Exec("UPDATE cart_items SET quantity = ? WHERE cart_id = ? AND product_id = ?",
+		quantity, cartId, productId)
 	if err != nil {
-		return err
+		return basket.ErrCartUpdateFailed
 	}
 	return nil
 }
@@ -81,6 +80,6 @@ func (c cartRepo) DeleteProduct(cartId, productId int) error {
 	return err
 }
 
-func NewCartRepository(db *pgx.Conn) domain2.CartRepository {
+func NewCartRepository(db *pgx.Conn) basket.CartRepository {
 	return &cartRepo{db: db}
 }
