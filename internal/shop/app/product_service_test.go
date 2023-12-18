@@ -1,6 +1,8 @@
 package app
 
 import (
+	"errors"
+	"github.com/stretchr/testify/assert"
 	"golang-project-template/internal/shop/domain"
 	"testing"
 )
@@ -33,7 +35,41 @@ func TestGetOneProduct(t *testing.T) {
 	})
 }
 
+func TestNewProduct(t *testing.T) {
+	newProduct := domain.NewProduct{
+		Name:   "Test Product",
+		Price:  100,
+		ShopId: 1,
+	}
+
+	testCase := []struct {
+		name          string
+		mockSaveFunc  func(product *domain.Product) (int, error)
+		expectedId    int
+		expectedError error
+	}{{
+		name: "Successfully save",
+		mockSaveFunc: func(product *domain.Product) (int, error) {
+			return 1, nil
+		},
+	}}
+	for _, tc := range testCase {
+		t.Run(tc.name, func(t *testing.T) {
+			mockRepo := &mockProductRepo{
+				SaveFunc: tc.mockSaveFunc,
+			}
+			useCase := NewProductService(mockRepo)
+
+			id, err := useCase.Add(newProduct)
+
+			assert.Equal(t, tc.expectedId, id, "Id mismatch")
+			assert.Equal(t, tc.expectedError, err, "Error mismatch")
+		})
+	}
+}
+
 type mockProductRepo struct {
+	SaveFunc func(product *domain.Product) (int, error)
 }
 
 func newMockProductRepo() domain.ProductRepository {
@@ -49,7 +85,12 @@ func (m *mockProductRepo) FindById(id int) (*domain.Product, error) {
 }
 
 func (m *mockProductRepo) Save(product *domain.Product) (int, error) {
-	//TODO implement me
+	if m.SaveFunc != nil {
+		return m.SaveFunc(product)
+	}
+	return 0, errors.New("Save func is implemented")
+}
+func (m *mockProductRepo) UpdateProduct(productID int, product *domain.Product) (*domain.Product, error) {
 	panic("implement me")
 }
 
