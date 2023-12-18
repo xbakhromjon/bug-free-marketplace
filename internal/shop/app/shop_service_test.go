@@ -15,7 +15,7 @@ func newMockShopRepo() domain.ShopRepository {
 	return &mockShopRepo{}
 }
 
-func (m *mockShopRepo) Save(shop domain.NewShop) (int, error) {
+func (m *mockShopRepo) Save(shop *domain.Shop) (int, error) {
 	if shop.GetName() == "" {
 		return 0, domain.ErrEmptyShopName
 	}
@@ -33,18 +33,18 @@ func (m *mockShopRepo) CheckShopNameExists(shopName string) (bool, error) {
 	return false, nil
 }
 
-func (m *mockShopRepo) FindShopById(id int) (*domain.Shop, error) {
+func (m *mockShopRepo) FindShopById(id int) (domain.Shop, error) {
 	if id == 1 {
 		return newValidShop(), nil
 	}
-	return &domain.Shop{}, domain.ErrShopNotFound
+	return domain.Shop{}, domain.ErrShopNotFound
 }
 
 func (m *mockShopRepo) FindAllShops(limit, offset int, search string) ([]domain.Shop, error) {
 
 	if limit == 1 && offset == 1 && search == "" {
 		return []domain.Shop{
-			*newValidShop(),
+			newValidShop(),
 		}, nil
 	}
 
@@ -63,16 +63,15 @@ func (u mockUserRepo) UserExists(id int) (bool, error) {
 
 func TestCreateShop(t *testing.T) {
 
-	underTest := shopService{
+	service := shopService{
 		repository:     newMockShopRepo(),
 		shopFactory:    domain.NewShopFactory(20, 10),
 		userRepository: mockUserRepo{},
 	}
 
 	t.Run("Create Shop successfully", func(t *testing.T) {
-		got, err := underTest.Create(
-			domain.MakeNewShop("testing shop name", 1),
-		)
+		reqShop := NewShop{"testing shop name", 1}
+		got, err := service.Create(reqShop)
 		want := 1
 		if err != nil {
 			t.Errorf("Error expected to be nil, bot got %v", err)
@@ -84,33 +83,33 @@ func TestCreateShop(t *testing.T) {
 
 	cases := []struct {
 		label     string
-		newShop   domain.NewShop
+		newShop   NewShop
 		wantedErr domain.Err
 	}{
 		{
 			"empty shop name",
-			domain.MakeNewShop("", 1),
+			NewShop{"", 1},
 			domain.ErrEmptyShopName,
 		},
 		{
 			"shop name exists",
-			domain.MakeNewShop("existing shop", 1),
+			NewShop{"existing shop", 1},
 			domain.ErrShopNameExists,
 		},
 		{
 			"invalid shop name",
-			domain.MakeNewShop("shop name that contains more than 20 chars", 1),
+			NewShop{"shop name that contains more than 20 chars", 1},
 			domain.ErrInvalidShopName,
 		},
 		{
 			"no such user",
-			domain.MakeNewShop("random shop name", 1),
+			NewShop{"random shop name", 1},
 			domain.ErrUserNotExists,
 		},
 	}
 	for _, test := range cases {
 		t.Run(test.label, func(t *testing.T) {
-			_, gotErr := underTest.Create(test.newShop)
+			_, gotErr := service.Create(test.newShop)
 			if gotErr == nil {
 				t.Error("Expected error but got nil")
 			} else if gotErr != test.wantedErr {
@@ -121,13 +120,13 @@ func TestCreateShop(t *testing.T) {
 }
 
 func TestGetShopById(t *testing.T) {
-	underTest := shopService{
+	service := shopService{
 		repository:     newMockShopRepo(),
 		userRepository: mockUserRepo{},
 	}
 
 	t.Run("Get Shop By correct Id", func(t *testing.T) {
-		got, err := underTest.GetShopById(1)
+		got, err := service.GetShopById(1)
 		want := newValidShop()
 		if err != nil {
 			t.Errorf("Error didn`t expected, but got %v", err)
@@ -138,7 +137,7 @@ func TestGetShopById(t *testing.T) {
 	})
 
 	t.Run("Get Shop By incorrect Id", func(t *testing.T) {
-		_, err := underTest.GetShopById(2)
+		_, err := service.GetShopById(2)
 		want := domain.ErrShopNotFound
 		if err == nil {
 			t.Error("Expected err, but but didn`t get")
@@ -150,7 +149,7 @@ func TestGetShopById(t *testing.T) {
 }
 
 func TestGetAllShops(t *testing.T) {
-	underTest := shopService{
+	service := shopService{
 		repository:     newMockShopRepo(),
 		shopFactory:    domain.NewShopFactory(20, 10),
 		userRepository: mockUserRepo{},
@@ -158,9 +157,9 @@ func TestGetAllShops(t *testing.T) {
 
 	t.Run("GetAllShops successfully", func(t *testing.T) {
 		want := []domain.Shop{
-			*newValidShop(),
+			newValidShop(),
 		}
-		got, err := underTest.GetAllShops(1, 1, "")
+		got, err := service.GetAllShops(1, 1, "")
 
 		if err != nil {
 			t.Errorf("Didn`t expect error, but got %q", err)
@@ -183,7 +182,7 @@ func TestGetAllShops(t *testing.T) {
 
 	for _, test := range cases {
 		t.Run(test.label, func(t *testing.T) {
-			_, err := underTest.GetAllShops(test.limit, test.offset, test.search)
+			_, err := service.GetAllShops(test.limit, test.offset, test.search)
 
 			if err == nil {
 				t.Error("Expected error, but didn`t get")
@@ -195,13 +194,13 @@ func TestGetAllShops(t *testing.T) {
 
 }
 
-func newValidShop() *domain.Shop {
-	res := &domain.Shop{}
+func newValidShop() domain.Shop {
+	res := domain.Shop{}
 	res.SetId(1)
 	res.SetName("Default")
 	res.SetOwnerId(1)
-	res.SetCreateAt(time.Now().Format(time.RFC1123))
-	res.SetUpdatedAt(time.Now().Format(time.RFC1123))
+	res.SetCreateAt(time.Now())
+	res.SetUpdatedAt(time.Now())
 	return res
 
 }

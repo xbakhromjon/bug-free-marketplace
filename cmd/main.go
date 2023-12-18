@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"golang-project-template/internal/common"
 	"golang-project-template/internal/common/postgres"
 	shopAdapters "golang-project-template/internal/shop/adapters"
@@ -9,6 +10,7 @@ import (
 	shophandler "golang-project-template/internal/shop/ports/rest/handler"
 	userAdapters "golang-project-template/internal/users/adapters"
 	"log"
+	"math/bits"
 	"net/http"
 	"os"
 
@@ -17,6 +19,13 @@ import (
 )
 
 func main() {
+	const (
+		MaxUint uint = (1 << bits.UintSize) - 1
+		MaxInt  int  = (1<<bits.UintSize)/2 - 1
+		MinInt  int  = (1 << bits.UintSize) / -2
+	)
+
+	fmt.Println(MaxUint, MaxInt, MinInt)
 	// app.Execute()
 	httpServer()
 

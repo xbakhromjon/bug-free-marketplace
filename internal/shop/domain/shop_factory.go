@@ -11,15 +11,23 @@ func NewShopFactory(maxNameLen, maxSearchLength int) ShopFactory {
 	return ShopFactory{maxNameLen: maxNameLen, maxSearchLength: maxSearchLength}
 }
 
-func (f *ShopFactory) Validate(shop NewShop) error {
-	if shop.GetName() == "" {
+func (f *ShopFactory) Validate(name string) error {
+	if name == "" {
 		return ErrEmptyShopName
 	}
 
-	if len(shop.GetName()) > f.maxNameLen {
+	if len(name) > f.maxNameLen {
 		return ErrInvalidShopName
 	}
 	return nil
+}
+
+func (f *ShopFactory) NewShop(name string, ownerId int) (*Shop, error) {
+	err := f.Validate(name)
+	if err != nil {
+		return &Shop{}, err
+	}
+	return &Shop{name: name, ownerId: ownerId, createdAt: time.Now().UTC(), updatedAt: time.Now().UTC()}, nil
 }
 
 func (f *ShopFactory) GetAllShopsInputValidate(limit, offset int, search string) error {
@@ -44,12 +52,12 @@ func (f *ShopFactory) ParseModelToDomain(
 	ownerId int,
 	createdAt time.Time,
 	updatedAt time.Time,
-) *Shop {
-	return &Shop{
+) Shop {
+	return Shop{
 		id:        id,
 		name:      name,
 		ownerId:   ownerId,
-		createdAt: createdAt.Format(time.RFC1123),
-		updatedAt: updatedAt.Format(time.RFC1123),
+		createdAt: createdAt,
+		updatedAt: updatedAt,
 	}
 }

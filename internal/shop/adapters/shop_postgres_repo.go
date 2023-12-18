@@ -21,7 +21,7 @@ func NewShopRepository(db *postgres.PostgresDB) domain.ShopRepository {
 	return &shopPostgresRepo{db: db}
 }
 
-func (s *shopPostgresRepo) Save(shop domain.NewShop) (int, error) {
+func (s *shopPostgresRepo) Save(shop *domain.Shop) (int, error) {
 	var id int
 
 	createShopQuery := fmt.Sprintf(`
@@ -84,7 +84,7 @@ func (s *shopPostgresRepo) CheckShopNameExists(shopName string) (bool, error) {
 	return exists, nil
 }
 
-func (s *shopPostgresRepo) FindShopById(shopId int) (*domain.Shop, error) {
+func (s *shopPostgresRepo) FindShopById(shopId int) (domain.Shop, error) {
 	// shop := domain.Shop{}
 	var (
 		id        int
@@ -121,10 +121,9 @@ func (s *shopPostgresRepo) FindShopById(shopId int) (*domain.Shop, error) {
 	)
 
 	if err != nil {
-		return &domain.Shop{}, err
+		return domain.Shop{}, err
 	}
 	shop := s.f.ParseModelToDomain(id, name, ownerId, createdAt, updatedAt)
-	fmt.Println(shop)
 	return shop, nil
 }
 
@@ -175,7 +174,7 @@ func (s *shopPostgresRepo) FindAllShops(limit, offset int, search string) ([]dom
 			return []domain.Shop{}, err
 		}
 		shop := s.f.ParseModelToDomain(id, name, ownerId, createdAt, updatedAt)
-		shops = append(shops, *shop)
+		shops = append(shops, shop)
 	}
 
 	return shops, nil

@@ -13,7 +13,6 @@ type productPostgresRepo struct {
 }
 
 func NewProductRepository(db *pgx.Conn) domain.ProductRepository {
-
 	return &productPostgresRepo{db: db}
 }
 
