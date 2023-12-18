@@ -3,7 +3,7 @@ package controller
 import (
 	"encoding/json"
 	"fmt"
-	jwt "golang-project-template/internal/pkg/jwt"
+	"golang-project-template/internal/pkg/jwt"
 	"golang-project-template/internal/users/app"
 	"golang-project-template/internal/users/domain"
 	"net/http"
