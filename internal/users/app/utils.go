@@ -5,9 +5,6 @@ import (
 	"golang-project-template/internal/users/domain"
 	"regexp"
 	"strings"
-	"time"
-
-	"github.com/golang-jwt/jwt"
 )
 
 func validatePassword(password string) error {
@@ -58,46 +55,9 @@ func validateUserInfoForLogin(phoneNumber, password string) error {
 	return nil
 }
 
-func CreateToken(user string, duration time.Duration) (string, error) {
-	claims := jwt.MapClaims{
-		"exp": time.Now().Add(duration).Unix(),
-		"iat": time.Now().Unix(),
-		"sub": user,
+func validatePhoneNumberCount(phoneNumber string) error {
+	if len(phoneNumber) > 12 {
+		return errors.New("phone number count is more than 12")
 	}
-
-	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	token, err := jwtToken.SignedString([]byte("marketplace"))
-	if err != nil {
-		return "", err
-	}
-
-	return token, nil
-}
-
-func VerifyToken(token string) (jwt.MapClaims, error) {
-	keyFunc := func(token *jwt.Token) (interface{}, error) {
-		_, ok := token.Method.(*jwt.SigningMethodHMAC)
-		if !ok {
-			return nil, errors.New("invalid token")
-		}
-
-		return []byte("marketplace"), nil
-	}
-
-	jwtToken, err := jwt.Parse(token, keyFunc)
-	if err != nil {
-		if ver, ok := err.(*jwt.ValidationError); ok {
-			if ver.Errors & jwt.ValidationErrorExpired != 0 {
-				return nil, errors.New("expired token")
-			}
-		}
-		return nil, errors.New("invalid token")
-	}
-
-	claims, ok := jwtToken.Claims.(jwt.MapClaims)
-	if !ok {
-		return nil, errors.New("invalid token")
-	}
-
-	return claims, nil
+	return nil
 }

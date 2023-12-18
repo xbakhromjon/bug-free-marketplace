@@ -6,7 +6,6 @@ require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-chi/chi/v5 v5.0.10
 	github.com/golang-jwt/jwt v3.2.2+incompatible
-	github.com/gorilla/mux v1.8.1
 	github.com/jackc/pgx v3.6.2+incompatible
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.8.4
