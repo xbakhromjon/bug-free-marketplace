@@ -8,7 +8,7 @@ import (
 type CartService interface {
 	CreateCart(userID int) (int, error)
 	GetBasket(userID int) (*basket.Cart, error)
-	GetBasketItem(cartId int) (*basket.CartItems, error)
+	GetCartItem(cartId int) ([]*basket.CartItems, error)
 	AddProductToCart(userID, productID, quantity int) (*basket.Cart, error)
 	UpdateProductQuantity(cartId, quantity int) error
 	DeleteProductFromCart(userId, productId int) error
@@ -58,7 +58,7 @@ func (cs CartServiceImpl) GetBasket(userID int) (*basket.Cart, error) {
 	return cart, nil
 }
 
-func (cs CartServiceImpl) GetBasketItem(cartId int) (*basket.CartItems, error) {
+func (cs CartServiceImpl) GetCartItem(cartId int) ([]*basket.CartItems, error) {
 	cItems, err := cs.cartRepo.GetCardItem(cartId)
 	if err != nil {
 		return nil, basket.ErrCartItemNotFound

@@ -23,16 +23,19 @@ func (c cartRepo) GetCartItemByCartIdAndProductId(cartId, productId int) (*baske
 	return &cItems, nil
 }
 
-func (c cartRepo) GetCardItem(cartId int) (*basket.CartItems, error) {
-	row := c.db.QueryRow("SELECT id, cart_id, product_id, quantity from card_items WHERE cart_id = $1", cartId)
-	var cartItems basket.CartItems
-	err := row.Scan(&cartItems.Id, &cartItems.CartId, &cartItems.ProductId, &cartItems.Quantity)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, basket.ErrCartItemNotFound
+func (c cartRepo) GetCardItem(cartId int) ([]*basket.CartItems, error) {
+	row, _ := c.db.Query("SELECT * from cart_items WHERE cart_id = $1", cartId)
+
+	var Items []*basket.CartItems
+	for row.Next() {
+		var cItem *basket.CartItems
+		err := row.Scan(&cItem.Id, &cItem.CartId, &cItem.ProductId, &cItem.Quantity)
+		if err != nil {
+			return nil, err
 		}
+		Items = append(Items, cItem)
 	}
-	return &cartItems, nil
+	return Items, nil
 }
 
 func (c cartRepo) CreateCardItem(cart *basket.CartItems) (int, error) {
