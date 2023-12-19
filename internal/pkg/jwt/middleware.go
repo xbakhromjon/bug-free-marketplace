@@ -3,6 +3,7 @@ package jwt
 import (
 	"context"
 	"net/http"
+	"strings"
 )
 
 func AuthMiddleWare(next http.Handler) http.Handler {
@@ -14,9 +15,16 @@ func AuthMiddleWare(next http.Handler) http.Handler {
 			return
 		}
 
-		claims, err := VerifyToken(accessToken)
+		if !strings.HasPrefix(accessToken, "Bearer ") {
+			http.Error(w, "Invalid Authorization header format", http.StatusUnauthorized)
+		}
+
+		// Extract the token from the header
+		token := strings.TrimPrefix(accessToken, "Bearer ")
+
+		claims, err := VerifyToken(token)
 		if err != nil {
-			http.Error(w, "error"+err.Error(), http.StatusUnauthorized)
+			http.Error(w, "error: "+err.Error(), http.StatusUnauthorized)
 			return
 		}
 

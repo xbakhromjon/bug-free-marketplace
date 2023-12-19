@@ -2,7 +2,6 @@ package controller
 
 import (
 	"encoding/json"
-	"fmt"
 	"golang-project-template/internal/pkg/jwt"
 	"golang-project-template/internal/users/app"
 	"golang-project-template/internal/users/domain"
@@ -143,7 +142,7 @@ func (c *UserController) GetUserByPhoneNumberHandler(w http.ResponseWriter, r *h
 	var newUser userObject
 
 	user, err := c.userUsecase.GetUserByPhoneNumber(phoneNumber)
-	fmt.Println(user)
+
 	if err != nil {
 		http.Error(w, "internal error: "+err.Error(), http.StatusInternalServerError)
 		return
