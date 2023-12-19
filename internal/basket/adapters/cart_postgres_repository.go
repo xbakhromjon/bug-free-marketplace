@@ -11,7 +11,7 @@ type cartRepo struct {
 }
 
 func (c cartRepo) GetCartItemByCartIdAndProductId(cartId, productId int) (*basket.CartItems, error) {
-	row := c.db.QueryRow("SELECT id, cart_id, product_id, quantity from card_items WHERE cart_id = $1 and product_id = $2",
+	row := c.db.QueryRow("SELECT * from card_items WHERE cart_id = $1 and product_id = $2",
 		cartId, productId)
 	var cItems basket.CartItems
 	err := row.Scan(&cItems.Id, &cItems.CartId, &cItems.ProductId, &cItems.Quantity)
@@ -78,9 +78,9 @@ func (c cartRepo) GetByUserId(userID int) (*basket.Cart, error) {
 	return &cart, err
 }
 
-func (c cartRepo) UpdateCartItem(cartId, productId, quantity int) error {
-	_, err := c.db.Exec("UPDATE cart_items SET quantity = quantity + $1 WHERE cart_id = $2 AND product_id = $3",
-		quantity, cartId, productId)
+func (c cartRepo) UpdateCartItem(cartId, quantity int) error {
+	_, err := c.db.Exec("UPDATE cart_items SET quantity = quantity + $1 WHERE cart_id = $2",
+		quantity, cartId)
 	if err != nil {
 		return basket.ErrCartUpdateFailed
 	}

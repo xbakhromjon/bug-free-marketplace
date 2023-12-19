@@ -6,19 +6,18 @@ import (
 )
 
 type CartService interface {
-	CreateCartItem(req basket.CartItems) error
 	CreateCart(userID int) (int, error)
 	GetBasket(userID int) (*basket.Cart, error)
 	GetBasketItem(cartId int) (*basket.CartItems, error)
-	UpdateProductQuantity(userId, productId, quantity int) error
 	AddProductToCart(userID, productID, quantity int) (*basket.Cart, error)
+	UpdateProductQuantity(cartId, quantity int) error
 	DeleteProductFromCart(userId, productId int) error
-	IncrementProductQuantity(userId, productId int) error
-	DecrementProductQuantity(userId, productId int) error
+	IncrementProductQuantity(cartId int) error
+	DecrementProductQuantity(cartId int) error
 }
 
 func NewCartService(repo basket.CartRepository) CartService {
-	return &CartServiceImpl{cartRepo: repo}
+	return CartServiceImpl{cartRepo: repo}
 }
 
 type CartServiceImpl struct {
@@ -26,7 +25,7 @@ type CartServiceImpl struct {
 	productRepo domain.ProductRepository
 }
 
-func (cs *CartServiceImpl) CreateCart(userID int) (int, error) {
+func (cs CartServiceImpl) CreateCart(userID int) (int, error) {
 	cart := &basket.Cart{
 		UserId: userID,
 	}
@@ -37,7 +36,7 @@ func (cs *CartServiceImpl) CreateCart(userID int) (int, error) {
 	return cartID, nil
 }
 
-func (cs *CartServiceImpl) CreateCartItem(req basket.CartItems) error {
+func (cs CartServiceImpl) CreateCartItem(req basket.CartItems) error {
 	cart := &basket.CartItems{
 		Id:        req.Id,
 		CartId:    req.CartId,
@@ -51,7 +50,7 @@ func (cs *CartServiceImpl) CreateCartItem(req basket.CartItems) error {
 	return nil
 }
 
-func (cs *CartServiceImpl) GetBasket(userID int) (*basket.Cart, error) {
+func (cs CartServiceImpl) GetBasket(userID int) (*basket.Cart, error) {
 	cart, err := cs.cartRepo.GetByUserId(userID)
 	if err != nil {
 		return nil, basket.ErrCartNotFound
@@ -59,7 +58,7 @@ func (cs *CartServiceImpl) GetBasket(userID int) (*basket.Cart, error) {
 	return cart, nil
 }
 
-func (cs *CartServiceImpl) GetBasketItem(cartId int) (*basket.CartItems, error) {
+func (cs CartServiceImpl) GetBasketItem(cartId int) (*basket.CartItems, error) {
 	cItems, err := cs.cartRepo.GetCardItem(cartId)
 	if err != nil {
 		return nil, basket.ErrCartItemNotFound
@@ -67,30 +66,15 @@ func (cs *CartServiceImpl) GetBasketItem(cartId int) (*basket.CartItems, error) 
 	return cItems, nil
 }
 
-func (cs *CartServiceImpl) UpdateProductQuantity(cartId, productId, quantity int) error {
-	var userID int
-	cart, err := cs.cartRepo.GetByUserId(userID)
-	if err != nil {
-		return basket.ErrCartNotFound
-	}
-	cardItem, err := cs.cartRepo.GetCartItemByCartIdAndProductId(cart.Id, productId)
-	if err != nil {
-		return basket.ErrProductNotFound
-	}
-
-	newQuantity := cardItem.Quantity + quantity
-	if newQuantity < 0 {
-		newQuantity = 0
-	}
-	cardItem.Quantity = newQuantity
-	err = cs.cartRepo.UpdateCartItem(cartId, productId, cardItem.Quantity)
+func (cs CartServiceImpl) UpdateProductQuantity(cartId, quantity int) error {
+	err := cs.cartRepo.UpdateCartItem(cartId, quantity)
 	if err != nil {
 		return basket.ErrCartUpdateFailed
 	}
 	return nil
 }
 
-func (cs *CartServiceImpl) AddProductToCart(userID, productID, quantity int) (*basket.Cart, error) {
+func (cs CartServiceImpl) AddProductToCart(userID, productID, quantity int) (*basket.Cart, error) {
 	cart, err := cs.cartRepo.GetByUserId(userID)
 	if err != nil {
 		cart = &basket.Cart{
@@ -120,22 +104,18 @@ func (cs *CartServiceImpl) AddProductToCart(userID, productID, quantity int) (*b
 	return updatedCart, nil
 }
 
-func (cs *CartServiceImpl) IncrementProductQuantity(userId, productId int) error {
-	return cs.UpdateProductQuantity(userId, productId, +1)
+func (cs CartServiceImpl) IncrementProductQuantity(cartId int) error {
+	return cs.UpdateProductQuantity(cartId, +1)
 }
 
-func (cs *CartServiceImpl) DecrementProductQuantity(userId, productId int) error {
-	return cs.UpdateProductQuantity(userId, productId, -1)
+func (cs CartServiceImpl) DecrementProductQuantity(cartId int) error {
+	return cs.UpdateProductQuantity(cartId, -1)
 }
 
-func (cs *CartServiceImpl) DeleteProductFromCart(userId, productId int) error {
-	cart, err := cs.cartRepo.GetByUserId(userId)
-	if err != nil {
-		return basket.ErrCartNotFound
-	}
-	_, err = cs.cartRepo.GetCartItemByCartIdAndProductId(cart.Id, productId)
+func (cs CartServiceImpl) DeleteProductFromCart(cartId, productId int) error {
+	_, err := cs.cartRepo.GetCartItemByCartIdAndProductId(cartId, productId)
 	if err != nil {
 		return basket.ErrProductNotFound
 	}
-	return cs.cartRepo.DeleteProduct(cart.Id, productId)
+	return cs.cartRepo.DeleteProduct(cartId, productId)
 }
