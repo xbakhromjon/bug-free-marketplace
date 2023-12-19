@@ -1,19 +1,23 @@
 package controller
 
 import (
-	"github.com/gin-gonic/gin"
-	"log"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"golang-project-template/internal/basket/app"
 	"net/http"
 )
 
-func Router(controller *CartController) http.Handler {
-	router := gin.Default()
+func NewRouter(cartService app.CartService) http.Handler {
+	r := chi.NewRouter()
 
-	router.POST("/carts/:user_id/create", controller.CreateBasket)
-	router.GET("carts/:user_id", controller.GetBasket)
-	router.POST("/carts/:user_id/add-product/:product_id/:quantity", controller.AddProductToCart)
-	router.PUT("/carts/:user_id/increment/:product_id", controller.IncrementProductQuantity)
-	router.PUT("/carts/:user_id/decrement/:product_id", controller.DecrementProductQuantity)
-	log.Println("Server started on: 8080")
-	return router
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+
+	cartController := NewCartController(cartService)
+
+	r.Route("/cart", func(r chi.Router) {
+		r.Post("/create", cartController.CreateCart)
+	})
+
+	return r
 }
