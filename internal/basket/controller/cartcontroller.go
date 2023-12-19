@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/gin-gonic/gin"
 	"golang-project-template/internal/basket/app"
+	basket "golang-project-template/internal/basket/domain"
 	"net/http"
 	"strconv"
 )
@@ -24,6 +25,21 @@ func (cc *CartController) CreateBasket(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Basket successfully created"})
+}
+
+func (cc *CartController) CreateBasketItem(c *gin.Context) {
+	var req basket.CartItems
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
+
+	err := cc.cartUseCase.CreateCartItem(req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to cart item create"})
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"message": "Cart Item created successfully"})
 }
 
 func (cc *CartController) GetBasket(c *gin.Context) {
