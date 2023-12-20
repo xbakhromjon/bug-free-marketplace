@@ -10,10 +10,7 @@ type cartRepo struct {
 }
 
 func (c cartRepo) CreateBasket(userId int) (id int, err error) {
-	row, err := c.db.Query("INSERT INTO cart(user_id)VALUES ($1) RETURNING id", userId)
-	if err != nil {
-		return 0, basket.ErrCartCreationFailed
-	}
+	row := c.db.QueryRow("INSERT INTO cart(user_id) VALUES ($1) RETURNING id;", userId)
 	err = row.Scan(&id)
 	if err != nil {
 		return 0, basket.ErrIDScanFailed
@@ -21,12 +18,11 @@ func (c cartRepo) CreateBasket(userId int) (id int, err error) {
 	return id, nil
 }
 
-func (c cartRepo) GetAll(cartId int) ([]*basket.CartItems, error) {
+func (c cartRepo) GetAll(cartId int) ([]basket.CartItems, error) {
 	row, _ := c.db.Query("SELECT * from cart_items WHERE cart_id = $1", cartId)
-
-	var Items []*basket.CartItems
+	var Items []basket.CartItems
 	for row.Next() {
-		var cItem *basket.CartItems
+		var cItem basket.CartItems
 		err := row.Scan(&cItem.Id, &cItem.CartId, &cItem.ProductId, &cItem.Quantity)
 		if err != nil {
 			return nil, err
@@ -37,11 +33,8 @@ func (c cartRepo) GetAll(cartId int) ([]*basket.CartItems, error) {
 }
 
 func (c cartRepo) AddItem(cart *basket.CartItems) (id int, err error) {
-	row, err := c.db.Query("INSERT INTO cart_items(cart_id,product_id, quantity) VALUES ($1,$2,$3) RETURNING id",
-		cart.CartId, cart.CartId, cart.ProductId, cart.Quantity)
-	if err != nil {
-		return 0, basket.ErrCartItemCreationFailed
-	}
+	row := c.db.QueryRow("INSERT INTO cart_items(cart_id,product_id, quantity) VALUES ($1,$2,$3) RETURNING id",
+		cart.CartId, cart.ProductId, cart.Quantity)
 	err = row.Scan(&id)
 	if err != nil {
 		return 0, basket.ErrIDScanFailed
@@ -59,7 +52,7 @@ func (c cartRepo) UpdateCartItem(cartId, quantity int) error {
 }
 
 func (c cartRepo) DeleteProduct(cartId, productId int) (id int, err error) {
-	row, err := c.db.Query("delete from cart_items where cart_id = $1 AND product_id = $2 RETURNING id", cartId, productId)
+	row := c.db.QueryRow("delete from cart_items where cart_id = $1 AND product_id = $2 RETURNING id", cartId, productId)
 	if err != nil {
 		return 0, basket.ErrDeleteItemFailed
 	}
