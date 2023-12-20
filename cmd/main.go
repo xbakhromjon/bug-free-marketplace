@@ -1,6 +1,9 @@
 package main
 
 import (
+	"golang-project-template/internal/basket/adapters"
+	"golang-project-template/internal/basket/app"
+	"golang-project-template/internal/basket/controller"
 	"golang-project-template/internal/common"
 	shopAdapters "golang-project-template/internal/shop/adapters"
 	service "golang-project-template/internal/shop/app"
@@ -54,13 +57,23 @@ func httpServer() *chi.Mux {
 	shopService := service.NewShopService(shopRepo, shopFactory, userRepo)
 	shopHandler := shophandler.ShopHandler{ShopService: shopService}
 
+	//Cart router
+	cartRepo := adapters.NewCartRepository(db)
+	useCase := app.NewCartService(cartRepo)
+	cartController := controller.NewCartController(useCase)
+
 	// Routers
 	router.Route("/api", func(r chi.Router) {
-
 		r.Route("/shop", func(r chi.Router) {
 			r.Post("/", shopHandler.CreateShop)
 		})
-
+		r.Route("/cart", func(r chi.Router) {
+			r.Post("/create", cartController.CreateCart)
+			r.Post("/add-item", cartController.AddItem)
+			r.Get("/getAll", cartController.GetAll)
+			r.Put("/update", cartController.Update)
+			r.Delete("/delete", cartController.Delete)
+		})
 	})
 
 	server := &http.Server{Addr: os.Getenv("HTTP_PORT"), Handler: router}
