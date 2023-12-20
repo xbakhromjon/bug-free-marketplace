@@ -1,12 +1,9 @@
 package domain
 
 type CartRepository interface {
-	Create(cart *Cart) (int, error)
-	CreateCardItem(cart *CartItems) (int, error)
-	GetCart(id int) (*Cart, error)
+	CreateBasket(userId int) (int, error)
+	AddItem(cart *CartItems) (int, error)
 	UpdateCartItem(cartId, quantity int) error
-	DeleteProduct(cardId, productId int) error
-	GetByUserId(userID int) (*Cart, error)
-	GetCardItem(cartId int) ([]*CartItems, error)
-	GetCartItemByCartIdAndProductId(cartId, productId int) (*CartItems, error)
+	DeleteProduct(cartId, productId int) (id int, err error)
+	GetAll(cartId int) ([]*CartItems, error)
 }

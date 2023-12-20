@@ -24,7 +24,7 @@ func (cc *CartController) CreateCart(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = cc.cartUseCase.CreateCart(userID)
+	_, err = cc.cartUseCase.CreateBasket(userID)
 	if err != nil {
 		http.Error(w, "Failed to create a new basket", http.StatusInternalServerError)
 		return
