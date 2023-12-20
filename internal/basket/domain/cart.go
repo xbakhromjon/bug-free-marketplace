@@ -1,13 +1,13 @@
 package domain
 
 type Cart struct {
-	Id     int
-	UserId int
+	Id     int `json:"id"`
+	UserId int `json:"userId"`
 }
 
 type CartItems struct {
-	Id        int
-	CartId    int
-	ProductId int
-	Quantity  int
+	Id        int `json:"id"`
+	CartId    int `json:"cartId"`
+	ProductId int `json:"productId"`
+	Quantity  int `json:"quantity"`
 }

@@ -1,107 +1,35 @@
 package controller
 
 import (
-	"github.com/gin-gonic/gin"
+	"fmt"
+	"github.com/go-chi/chi/v5"
 	"golang-project-template/internal/basket/app"
 	"net/http"
 	"strconv"
 )
 
 type CartController struct {
-	cartUseCase *app.CartServiceImpl
+	cartUseCase app.CartService
 }
 
-func (cc *CartController) CreateBasket(c *gin.Context) {
-	userID, err := getUserIdFromContext(c)
+func NewCartController(cartUseCase app.CartService) *CartController {
+	return &CartController{cartUseCase: cartUseCase}
+}
+
+func (cc *CartController) CreateCart(w http.ResponseWriter, r *http.Request) {
+	userIDParam := chi.URLParam(r, "user_id")
+	userID, err := strconv.Atoi(userIDParam)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid User id"})
+		http.Error(w, "Invalid user id", http.StatusBadRequest)
 		return
 	}
 
 	_, err = cc.cartUseCase.CreateCart(userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create a new basket"})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"message": "Basket successfully created"})
-}
-
-func (cc *CartController) GetBasket(c *gin.Context) {
-	userID, err := getUserIdFromContext(c)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user Id"})
+		http.Error(w, "Failed to create a new basket", http.StatusInternalServerError)
 		return
 	}
 
-	cart, err := cc.cartUseCase.GetBasket(userID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Can't retrieve the basket"})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"cart": cart})
-}
-
-func (cc *CartController) AddProductToCart(c *gin.Context) {
-	userId, err := getUserIdFromContext(c)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user id"})
-		return
-	}
-
-	productId, err := strconv.Atoi(c.Param("product_id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product id"})
-		return
-	}
-
-	quantity, err := strconv.Atoi(c.Param("quantity"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid quantity"})
-		return
-	}
-
-	updateBasket, err := cc.cartUseCase.AddProductToCart(userId, productId, quantity)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add product to the cart"})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"cart": updateBasket})
-}
-
-func (cc *CartController) IncrementProductQuantity(c *gin.Context) {
-	userId, err := getUserIdFromContext(c)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user id"})
-		return
-	}
-
-	productId, err := strconv.Atoi(c.Param("product_id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product id"})
-	}
-
-	err = cc.cartUseCase.IncrementProductQuantity(userId, productId)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to increment quantity"})
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Quantity is incremented"})
-}
-
-func (cc *CartController) DecrementProductQuantity(c *gin.Context) {
-	userId, err := getUserIdFromContext(c)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user id"})
-	}
-
-	productId, err := strconv.Atoi(c.Param("product_id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product id"})
-	}
-
-	err = cc.cartUseCase.DecrementProductQuantity(userId, productId)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to decrement"})
-	}
-	c.JSON(http.StatusOK, gin.H{"message": "Quantity is decremented"})
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprint(w, "Basket successfully created")
 }
