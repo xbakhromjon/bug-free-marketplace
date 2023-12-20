@@ -1,7 +1,6 @@
 package domain
 
 const (
-	ErrCartNotFound           = Err("Cart not found")
 	ErrCartItemNotFound       = Err("Cart item not found")
 	ErrCartCreationFailed     = Err("Cart creation failed")
 	ErrCartItemCreationFailed = Err("Cart Item creation failed")
