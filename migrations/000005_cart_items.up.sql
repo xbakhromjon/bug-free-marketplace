@@ -5,6 +5,6 @@ CREATE TABLE "cart_items"(
     "quantity" int
 );
 
-ALTER TABLE "cart_itemS" ADD FOREIGN KEY ("cart_id") REFERENCES "cart" ("id");
+ALTER TABLE "cart_items" ADD FOREIGN KEY ("cart_id") REFERENCES "cart" ("id");
 
 ALTER TABLE "cart_items" ADD FOREIGN KEY ("product_id") REFERENCES "product" ("id");
