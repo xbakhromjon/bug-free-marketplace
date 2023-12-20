@@ -1,7 +1,6 @@
 package adapters
 
 import (
-	"errors"
 	"github.com/jackc/pgx"
 	basket "golang-project-template/internal/basket/domain"
 )
@@ -10,25 +9,20 @@ type cartRepo struct {
 	db *pgx.Conn
 }
 
-func (c cartRepo) GetCartItemByCartIdAndProductId(cartId, productId int) (*basket.CartItems, error) {
-	row := c.db.QueryRow("SELECT * from card_items WHERE cart_id = $1 and product_id = $2",
-		cartId, productId)
-	var cItems basket.CartItems
-	err := row.Scan(&cItems.Id, &cItems.CartId, &cItems.ProductId, &cItems.Quantity)
+func (c cartRepo) CreateBasket(userId int) (id int, err error) {
+	row := c.db.QueryRow("INSERT INTO cart(user_id) VALUES ($1) RETURNING id;", userId)
+	err = row.Scan(&id)
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, basket.ErrCartItemNotFound
-		}
+		return 0, basket.ErrIDScanFailed
 	}
-	return &cItems, nil
+	return id, nil
 }
 
-func (c cartRepo) GetCardItem(cartId int) ([]*basket.CartItems, error) {
+func (c cartRepo) GetAll(cartId int) ([]basket.CartItems, error) {
 	row, _ := c.db.Query("SELECT * from cart_items WHERE cart_id = $1", cartId)
-
-	var Items []*basket.CartItems
+	var Items []basket.CartItems
 	for row.Next() {
-		var cItem *basket.CartItems
+		var cItem basket.CartItems
 		err := row.Scan(&cItem.Id, &cItem.CartId, &cItem.ProductId, &cItem.Quantity)
 		if err != nil {
 			return nil, err
@@ -38,47 +32,14 @@ func (c cartRepo) GetCardItem(cartId int) ([]*basket.CartItems, error) {
 	return Items, nil
 }
 
-func (c cartRepo) CreateCardItem(cart *basket.CartItems) (int, error) {
-	_, err := c.db.Exec("INSERT INTO cart_items(cart_id,product_id, quantity) VALUES ($1,$2,$3) RETURNING id",
-		cart.CartId, cart.CartId, cart.ProductId, cart.Quantity)
+func (c cartRepo) AddItem(cart *basket.CartItems) (id int, err error) {
+	row := c.db.QueryRow("INSERT INTO cart_items(cart_id,product_id, quantity) VALUES ($1,$2,$3) RETURNING id",
+		cart.CartId, cart.ProductId, cart.Quantity)
+	err = row.Scan(&id)
 	if err != nil {
-		return 0, basket.ErrCartItemCreationFailed
+		return 0, basket.ErrIDScanFailed
 	}
-	return cart.Id, nil
-}
-
-func (c cartRepo) Create(cart *basket.Cart) (int, error) {
-	_, err := c.db.Exec("INSERT INTO cart(user_id)VALUES ($1) RETURNING id", cart.UserId)
-	if err != nil {
-		return 0, basket.ErrCartCreationFailed
-	}
-	return cart.Id, nil
-}
-
-func (c cartRepo) GetCart(id int) (*basket.Cart, error) {
-	row := c.db.QueryRow("select id,user_id from cart where id = $1", id)
-	var cart basket.Cart
-	err := row.Scan(&cart.Id, &cart.UserId)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, basket.ErrCartNotFound
-		}
-		return nil, err
-	}
-	return &cart, nil
-}
-
-func (c cartRepo) GetByUserId(userID int) (*basket.Cart, error) {
-	row := c.db.QueryRow("select id,user_id from carts where user_id = $1", userID)
-	var cart basket.Cart
-	err := row.Scan(&cart.Id, &cart.UserId)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, basket.ErrCartNotFound
-		}
-		return nil, err
-	}
-	return &cart, err
+	return id, nil
 }
 
 func (c cartRepo) UpdateCartItem(cartId, quantity int) error {
@@ -90,9 +51,16 @@ func (c cartRepo) UpdateCartItem(cartId, quantity int) error {
 	return nil
 }
 
-func (c cartRepo) DeleteProduct(cartId, productId int) error {
-	_, err := c.db.Exec("delete from cart_items where cart_id = $1 AND product_id = $2", cartId, productId)
-	return err
+func (c cartRepo) DeleteProduct(cartId, productId int) (id int, err error) {
+	row := c.db.QueryRow("delete from cart_items where cart_id = $1 AND product_id = $2 RETURNING id", cartId, productId)
+	if err != nil {
+		return 0, basket.ErrDeleteItemFailed
+	}
+	err = row.Scan(&id)
+	if err != nil {
+		return 0, basket.ErrIDScanFailed
+	}
+	return id, nil
 }
 
 func NewCartRepository(db *pgx.Conn) basket.CartRepository {
