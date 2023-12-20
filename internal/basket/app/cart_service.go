@@ -8,7 +8,7 @@ import (
 type CartService interface {
 	CreateBasket(userID int) (int, error)
 	AddItem(cart *basket.CartItems) (int, error)
-	GetAll(cartId int) ([]*basket.CartItems, error)
+	GetAll(cartId int) ([]basket.CartItems, error)
 	UpdateProductQuantity(cartId, quantity int) error
 	DeleteProductFromCart(cartId, productId int) (id int, err error)
 }
@@ -23,7 +23,6 @@ type CartServiceImpl struct {
 }
 
 func (cs CartServiceImpl) CreateBasket(userID int) (int, error) {
-
 	cartId, err := cs.cartRepo.CreateBasket(userID)
 	if err != nil {
 		return 0, basket.ErrIDScanFailed
@@ -37,7 +36,7 @@ func (cs CartServiceImpl) AddItem(cart *basket.CartItems) (int, error) {
 	}
 	return id, nil
 }
-func (cs CartServiceImpl) GetAll(cartId int) ([]*basket.CartItems, error) {
+func (cs CartServiceImpl) GetAll(cartId int) ([]basket.CartItems, error) {
 	cItems, err := cs.cartRepo.GetAll(cartId)
 	if err != nil {
 		return nil, basket.ErrCartItemNotFound
