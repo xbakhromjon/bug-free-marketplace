@@ -4,7 +4,6 @@ import (
 	basketapp "golang-project-template/internal/basket/app"
 	"golang-project-template/internal/order/domain"
 	productapp "golang-project-template/internal/shop/app"
-	userapp "golang-project-template/internal/users/app"
 	"math/rand"
 	"time"
 )
@@ -16,12 +15,11 @@ type OrderService interface {
 	UpdateStatus(UserID int) error
 }
 
-func NewOrderService(repository domain.OrderRepository, basketUsecase basketapp.CartService, productUsecase productapp.ProductService, userUsecase userapp.UserUsecase) *orderService {
+func NewOrderService(repository domain.OrderRepository, basketUsecase basketapp.CartService, productUsecase productapp.ProductService) *orderService {
 	return &orderService{
 		repository:     repository,
 		basketUseCase:  basketUsecase,
 		productUsecase: productUsecase,
-		userUseCase:    userUsecase,
 	}
 }
 
@@ -29,7 +27,6 @@ type orderService struct {
 	repository     domain.OrderRepository
 	basketUseCase  basketapp.CartService
 	productUsecase productapp.ProductService
-	userUseCase    userapp.UserUsecase
 }
 
 func (o *orderService) CreateOrder(basketId int) error {
