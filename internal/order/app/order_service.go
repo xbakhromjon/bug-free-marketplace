@@ -9,7 +9,7 @@ import (
 )
 
 type OrderService interface {
-	CreateOrder(order domain.Order) error
+	CreateOrder(basketID int) error
 	GetOrderByID(orderID int) (domain.Order, error)
 	GetAllOrders() ([]domain.Order, error)
 	UpdateStatus(UserID int) error
