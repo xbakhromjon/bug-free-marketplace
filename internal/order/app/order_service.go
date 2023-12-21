@@ -31,7 +31,7 @@ type orderService struct {
 
 func (o *orderService) CreateOrder(basketId int) error {
 
-	cartItems, err := o.basketUseCase.GetCartItem(basketId)
+	cartItems, err := o.basketUseCase.GetAll(basketId)
 	if err != nil {
 		return err
 	}
