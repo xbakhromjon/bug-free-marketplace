@@ -56,6 +56,7 @@ func (o *OrderHandler) GetOrderByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Add("Context-Type", "application/json")
+
 	_, err = w.Write(response)
 	if err != nil {
 		logError("getOrderByID", err)
@@ -64,7 +65,45 @@ func (o *OrderHandler) GetOrderByID(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-//func (o *OrderHandler)
+func (o *OrderHandler) GetAllOrders(w http.ResponseWriter, r *http.Request) {
+	orders, err := o.OrderService.GetAllOrders()
+	if err != nil {
+		logError("getAllOrders", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	response, err := json.Marshal(orders)
+	if err != nil {
+		logError("getAllOrders", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.Header().Add("Content-Type", "application/json")
+
+	_, err = w.Write(response)
+	if err != nil {
+		logError("getOrderByID", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
+// this method changes order's status by id
+func (o *OrderHandler) UpdateStatusOrder(w http.ResponseWriter, r *http.Request) {
+	orderID, err := getIdFromRequest(r)
+	if err != nil {
+		logError("updateStatusOrder", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	if err := o.OrderService.UpdateStatus(orderID); err != nil {
+		logError("updateStatusOrder", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
 
 func getIdFromRequest(r *http.Request) (int, error) {
 	idStr := chi.URLParam(r, "id")
