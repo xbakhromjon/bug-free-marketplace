@@ -28,6 +28,8 @@ func (o *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
+	w.WriteHeader(http.StatusCreated)
 }
 
 func (o *OrderHandler) GetOrderByID(w http.ResponseWriter, r *http.Request) {
@@ -77,11 +79,3 @@ func getIdFromRequest(r *http.Request) (int, error) {
 
 	return int(id), nil
 }
-
-//// Vars returns the route variables for the current request, if any.
-//func Vars(r *http.Request) map[string]string {
-//	if rv := r.Context().Value(varsKey); rv != nil {
-//		return rv.(map[string]string)
-//	}
-//	return nil
-//}
