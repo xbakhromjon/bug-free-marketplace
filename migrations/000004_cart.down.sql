@@ -1,1 +1,1 @@
-DROP TABLE IF EXISTS "cart";
+DROP TABLE IF EXISTS "basket";
