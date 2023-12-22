@@ -11,7 +11,7 @@ type orderPostgresRepo struct {
 	db *pgx.Conn
 }
 
-func newOrderPostgresRepo(db *pgx.Conn) domain.OrderRepository {
+func NewOrderPostgresRepo(db *pgx.Conn) domain.OrderRepository {
 	return &orderPostgresRepo{db: db}
 }
 
