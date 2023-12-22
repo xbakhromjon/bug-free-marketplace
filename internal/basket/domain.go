@@ -1,8 +1,9 @@
 package basket
 
 type Basket struct {
-	Id     int
-	UserId int
+	Id        int
+	UserId    int
+	Purchased bool
 }
 
 type BasketItems struct {
