@@ -62,3 +62,15 @@ func (b *basketRepo) UpdateBasketStatus(basketId int) error {
 	}
 	return nil
 }
+
+func (b *basketRepo) DeleteProduct(basketId, productId int) (id int, err error) {
+	row := b.db.QueryRow("delete from basket_items where basket_id = $1 AND product_id = $2 RETURNING id", basketId, productId)
+	if err != nil {
+		return 0, domain.ErrDeleteItemFailed
+	}
+	err = row.Scan(&id)
+	if err != nil {
+		return 0, domain.ErrIDScanFailed
+	}
+	return id, nil
+}

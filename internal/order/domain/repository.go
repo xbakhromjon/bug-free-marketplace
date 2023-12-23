@@ -6,4 +6,5 @@ type BasketRepository interface {
 	GetAll(basketId int) ([]BasketItems, error)
 	UpdateBasketItem(basketId, quantity int) error
 	UpdateBasketStatus(basketId int) error
+	DeleteProduct(basketId, productId int) (int, error)
 }
