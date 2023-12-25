@@ -9,11 +9,11 @@ type basketItemRepo struct {
 	db *pgx.Conn
 }
 
-func NewBasketItemRepository(db *pgx.Conn) domain.BasketRepository {
-	return &basketRepo{db: db}
+func NewBasketItemRepository(db *pgx.Conn) domain.BasketItemRepository {
+	return &basketItemRepo{db: db}
 }
 
-func (b *basketRepo) AddItem(items *domain.BasketItems) (id int, err error) {
+func (b basketItemRepo) AddItem(items *domain.BasketItems) (id int, err error) {
 	row := b.db.QueryRow("INSERT INTO basket_items(basket_id,product_id,quantity) VALUES ($1,$2,$3) RETURNING id",
 		items.BasketId, items.ProductId, items.Quantity)
 	err = row.Scan(&id)
@@ -23,7 +23,7 @@ func (b *basketRepo) AddItem(items *domain.BasketItems) (id int, err error) {
 	return id, nil
 }
 
-func (b *basketRepo) GetAll(basketId int) ([]domain.BasketItems, error) {
+func (b basketItemRepo) GetAll(basketId int) ([]domain.BasketItems, error) {
 	row, _ := b.db.Query("SELECT b.id, b.basket_id, b.product_id, b.quantity from basket_items b WHERE b.basket_id = $1", basketId)
 	var Items []domain.BasketItems
 	for row.Next() {
@@ -37,16 +37,16 @@ func (b *basketRepo) GetAll(basketId int) ([]domain.BasketItems, error) {
 	return Items, nil
 }
 
-func (b *basketRepo) UpdateBasketItem(basketItemId, quantity int) error {
-	_, err := b.db.Exec("UPDATE basket_items SET quantity = quantity + $1 WHERE id = $2", quantity, basketItemId)
+func (b basketItemRepo) UpdateBasketItem(bItemId, quantity int) error {
+	_, err := b.db.Exec("UPDATE basket_items SET quantity = quantity + $1 WHERE id = $2", quantity, bItemId)
 	if err != nil {
 		return domain.ErrBasketUpdateFailed
 	}
 	return nil
 }
 
-func (b *basketRepo) DeleteProduct(basketItemId int) (id int, err error) {
-	row := b.db.QueryRow("delete from basket_items where id = $1 AND product_id = $2 RETURNING id", basketItemId)
+func (b basketItemRepo) DeleteProduct(bItemId int) (id int, err error) {
+	row := b.db.QueryRow("delete from basket_items where id = $1 AND product_id = $2 RETURNING id", bItemId)
 	if err != nil {
 		return 0, domain.ErrDeleteItemFailed
 	}
