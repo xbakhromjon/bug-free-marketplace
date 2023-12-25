@@ -41,6 +41,8 @@ func (o *orderRepo) GetAllOrders() ([]domain.Order, error) {
 
 	orders := make([]domain.Order, 0)
 
+	defer rows.Close()
+
 	for rows.Next() {
 		var order domain.Order
 
