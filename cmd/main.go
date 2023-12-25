@@ -1,16 +1,17 @@
 package main
 
 import (
-	"fmt"
 	"golang-project-template/internal/common"
 	"golang-project-template/internal/common/postgres"
+	"golang-project-template/internal/pkg/jwt"
 	shopAdapters "golang-project-template/internal/shop/adapters"
 	service "golang-project-template/internal/shop/app"
 	"golang-project-template/internal/shop/domain"
 	shophandler "golang-project-template/internal/shop/ports/rest/handler"
 	userAdapters "golang-project-template/internal/users/adapters"
+	userApp "golang-project-template/internal/users/app"
+	userController "golang-project-template/internal/users/ports/http/controller"
 	"log"
-	"math/bits"
 	"net/http"
 	"os"
 
@@ -19,14 +20,6 @@ import (
 )
 
 func main() {
-	const (
-		MaxUint uint = (1 << bits.UintSize) - 1
-		MaxInt  int  = (1<<bits.UintSize)/2 - 1
-		MinInt  int  = (1 << bits.UintSize) / -2
-	)
-
-	fmt.Println(MaxUint, MaxInt, MinInt)
-	// app.Execute()
 	httpServer()
 
 }
@@ -44,6 +37,15 @@ func httpServer() *chi.Mux {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
+	dbNew, err := postgres.New(
+		os.Getenv("POSTGRES_HOST"),
+		os.Getenv("POSTGRES_PORT"),
+		os.Getenv("POSTGRES_DATABASE"),
+		os.Getenv("POSTGRES_USER"),
+		os.Getenv("POSTGRES_PASSWORD"),
+		"disable",
+	)
+
 	defer db.Close()
 
 	router := chi.NewRouter()
@@ -55,19 +57,13 @@ func httpServer() *chi.Mux {
 	})
 
 	// User router
-	// ...
+	//userRepo := userAdapters.NewUserRepository(db)
+	userRepo := userAdapters.NewUserRepository(db)
+	userUsecase := userApp.NewUserUsecase(userRepo)
+	userHandler := userController.NewUserController(userUsecase)
 
 	// Shop router
-	postgresDb, err := postgres.New(
-		os.Getenv("POSTGRES_HOST"),
-		os.Getenv("POSTGRES_PORT"),
-		os.Getenv("POSTGRES_DATABASE"),
-		os.Getenv("POSTGRES_USER"),
-		os.Getenv("POSTGRES_PASSWORD"),
-		"disable",
-	)
-	shopRepo := shopAdapters.NewShopRepository(postgresDb)
-	userRepo := userAdapters.NewUserRepository(db)
+	shopRepo := shopAdapters.NewShopRepository(dbNew)
 	shopFactory := domain.NewShopFactory(256, 256)
 	shopService := service.NewShopService(shopRepo, shopFactory, userRepo)
 	shopHandler := shophandler.ShopHandler{ShopService: shopService}
@@ -75,7 +71,16 @@ func httpServer() *chi.Mux {
 	// Routers
 	router.Route("/api", func(r chi.Router) {
 
+		r.Route("/users", func(r chi.Router) {
+			r.Post("/register-admin/", userHandler.RegisterAdminUserHandler)
+			r.Post("/register-merchant/", userHandler.RegisterMerchantHandler)
+			r.Post("/register-customer/", userHandler.RegisterCustomerHandler)
+			r.Post("/login/", userHandler.LoginUserHandler)
+			r.With(jwt.AuthMiddleWare).Get("/get-user/{phone_number}", userHandler.GetUserByPhoneNumberHandler)
+		})
+
 		r.Route("/shop", func(r chi.Router) {
+
 			r.Post("/", shopHandler.CreateShop)
 			r.Get("/{id}", shopHandler.GetShopById)
 			r.Get("/", shopHandler.GetAllShops)
@@ -84,7 +89,7 @@ func httpServer() *chi.Mux {
 	})
 
 	server := &http.Server{Addr: os.Getenv("HTTP_PORT"), Handler: router}
-	log.Println("Starting server...")
+	log.Println("Starting server on port...", os.Getenv("HTTP_PORT"))
 	if err := server.ListenAndServe(); err != http.ErrServerClosed {
 		panic(err)
 	}
