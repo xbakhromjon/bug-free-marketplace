@@ -25,7 +25,6 @@ func (b *basketRepo) CreateBasket(userId int) (id int, err error) {
 func (b *basketRepo) AddItem(items *domain.BasketItems) (id int, err error) {
 	row := b.db.QueryRow("INSERT INTO basket_items(basket_id,product_id,quantity) VALUES ($1,$2,$3) RETURNING id",
 		items.BasketId, items.ProductId, items.Quantity)
-
 	err = row.Scan(&id)
 	if err != nil {
 		return 0, domain.ErrIDScanFailed
@@ -47,8 +46,8 @@ func (b *basketRepo) GetAll(basketId int) ([]domain.BasketItems, error) {
 	return Items, nil
 }
 
-func (b *basketRepo) GetActiveBasket(basketID int) (*domain.Basket, error) {
-	row := b.db.QueryRow("SELECT b.id, b.user_id b.purchased FROM basket b WHERE b.id = $1 AND b.purchased = false LIMIT 1", basketID)
+func (b *basketRepo) GetActiveBasket(userID int) (*domain.Basket, error) {
+	row := b.db.QueryRow("SELECT b.basket_id FROM basket b WHERE b.user_id = $1 AND b.purchased = false", userID)
 	var basket domain.Basket
 	if err := row.Scan(&basket.Id, &basket.UserId, &basket.Purchased); err != nil {
 		return nil, err
@@ -56,16 +55,16 @@ func (b *basketRepo) GetActiveBasket(basketID int) (*domain.Basket, error) {
 	return &basket, nil
 }
 
-func (b *basketRepo) UpdateBasketItem(basketId, quantity int) error {
-	_, err := b.db.Exec("UPDATE basket_items SET quantity = quantity + $1 WHERE basket_id = $2", quantity, basketId)
+func (b *basketRepo) UpdateBasketItem(basketItemId, quantity int) error {
+	_, err := b.db.Exec("UPDATE basket_items SET quantity = quantity + $1 WHERE id = $2", quantity, basketItemId)
 	if err != nil {
 		return domain.ErrBasketUpdateFailed
 	}
 	return nil
 }
 
-func (b *basketRepo) DeleteProduct(basketId, productId int) (id int, err error) {
-	row := b.db.QueryRow("delete from basket_items where basket_id = $1 AND product_id = $2 RETURNING id", basketId, productId)
+func (b *basketRepo) DeleteProduct(basketItemId, productId int) (id int, err error) {
+	row := b.db.QueryRow("delete from basket_items where id = $1 AND product_id = $2 RETURNING id", basketItemId, productId)
 	if err != nil {
 		return 0, domain.ErrDeleteItemFailed
 	}
