@@ -29,10 +29,10 @@ func (b *basketRepo) CreateBasket(userId int) (id int, err error) {
 
 func (b *basketRepo) GetBasket(basketId int) (*BasketWithItems, error) {
 	query := `
-		SELECT b.*, bi.Id as ItemId, bi.ProductId, bi.Quantity
-		FROM Basket b
-		LEFT JOIN BasketItems bi ON b.Id = bi.BasketId
-		WHERE b.Id = $1`
+		SELECT b.*, bi.id as ItemId, bi.product_id, bi.quantity
+		FROM basket b
+		LEFT JOIN basket_items bi ON b.id = bi.basket_id
+		WHERE b.id = $1`
 	rows, err := b.db.Query(query, basketId)
 	if err != nil {
 		return nil, err
