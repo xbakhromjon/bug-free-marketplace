@@ -1,10 +1,11 @@
 package adapters
 
 import (
+	"context"
 	"fmt"
+	"golang-project-template/internal/common/postgres"
 	"golang-project-template/internal/shop/domain"
-
-	"github.com/jackc/pgx"
+	"time"
 )
 
 var (
@@ -12,14 +13,15 @@ var (
 )
 
 type shopPostgresRepo struct {
-	db *pgx.Conn
+	db *postgres.PostgresDB
+	f  domain.ShopFactory
 }
 
-func NewShopRepository(db *pgx.Conn) domain.ShopRepository {
+func NewShopRepository(db *postgres.PostgresDB) domain.ShopRepository {
 	return &shopPostgresRepo{db: db}
 }
 
-func (s *shopPostgresRepo) Save(shop domain.NewShop) (int, error) {
+func (s *shopPostgresRepo) Save(shop *domain.Shop) (int, error) {
 	var id int
 
 	createShopQuery := fmt.Sprintf(`
@@ -34,9 +36,10 @@ func (s *shopPostgresRepo) Save(shop domain.NewShop) (int, error) {
 	`, shopTableName)
 
 	err := s.db.QueryRow(
+		context.Background(),
 		createShopQuery,
-		shop.Name,
-		shop.OwnerId,
+		shop.GetName(),
+		shop.GetOwnerId(),
 	).Scan(
 		&id,
 	)
@@ -67,6 +70,7 @@ func (s *shopPostgresRepo) CheckShopNameExists(shopName string) (bool, error) {
 		`, shopTableName)
 
 	err := s.db.QueryRow(
+		context.Background(),
 		queryCheckShopNameExists,
 		shopName,
 	).Scan(
@@ -78,4 +82,100 @@ func (s *shopPostgresRepo) CheckShopNameExists(shopName string) (bool, error) {
 	}
 
 	return exists, nil
+}
+
+func (s *shopPostgresRepo) FindShopById(shopId int) (domain.Shop, error) {
+	// shop := domain.Shop{}
+	var (
+		id        int
+		name      string
+		ownerId   int
+		createdAt time.Time
+		updatedAt time.Time
+	)
+	queryGetShopById := fmt.Sprintf(`
+	SELECT 
+		id,
+		name,
+		owner_id,
+		created_at,
+		updated_at
+	FROM
+		%s
+	WHERE
+		deleted_at IS NULL
+	AND 
+		id=$1
+	
+`, shopTableName)
+
+	err := s.db.QueryRow(context.Background(),
+		queryGetShopById,
+		shopId,
+	).Scan(
+		&id,
+		&name,
+		&ownerId,
+		&createdAt,
+		&updatedAt,
+	)
+
+	if err != nil {
+		return domain.Shop{}, err
+	}
+	shop := s.f.ParseModelToDomain(id, name, ownerId, createdAt, updatedAt)
+	return shop, nil
+}
+
+func (s *shopPostgresRepo) FindAllShops(limit, offset int, search string) ([]domain.Shop, error) {
+	shops := []domain.Shop{}
+	var (
+		id        int
+		name      string
+		ownerId   int
+		createdAt time.Time
+		updatedAt time.Time
+	)
+	queryGetAllShops := fmt.Sprint(`
+		SELECT 
+			id,
+			name,
+			owner_id,
+			created_at,
+			updated_at
+		FROM
+			shop
+		WHERE
+			name ILIKE '%' || $1 || '%'
+		AND
+			deleted_at IS NULL
+		LIMIT
+			$2
+		OFFSET
+			$3
+	`)
+
+	row, err := s.db.Query(context.Background(), queryGetAllShops, search, limit, offset)
+
+	if err != nil {
+		return []domain.Shop{}, err
+	}
+	defer row.Close()
+
+	for row.Next() {
+		err := row.Scan(
+			&id,
+			&name,
+			&ownerId,
+			&createdAt,
+			&updatedAt,
+		)
+		if err != nil {
+			return []domain.Shop{}, err
+		}
+		shop := s.f.ParseModelToDomain(id, name, ownerId, createdAt, updatedAt)
+		shops = append(shops, shop)
+	}
+
+	return shops, nil
 }

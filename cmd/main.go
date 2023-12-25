@@ -2,6 +2,7 @@ package main
 
 import (
 	"golang-project-template/internal/common"
+	"golang-project-template/internal/common/postgres"
 	"golang-project-template/internal/pkg/jwt"
 	shopAdapters "golang-project-template/internal/shop/adapters"
 	service "golang-project-template/internal/shop/app"
@@ -19,7 +20,6 @@ import (
 )
 
 func main() {
-	// app.Execute()
 	httpServer()
 
 }
@@ -36,6 +36,15 @@ func httpServer() *chi.Mux {
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
+
+	dbNew, err := postgres.New(
+		os.Getenv("POSTGRES_HOST"),
+		os.Getenv("POSTGRES_PORT"),
+		os.Getenv("POSTGRES_DATABASE"),
+		os.Getenv("POSTGRES_USER"),
+		os.Getenv("POSTGRES_PASSWORD"),
+		"disable",
+	)
 
 	defer db.Close()
 
@@ -54,8 +63,8 @@ func httpServer() *chi.Mux {
 	userHandler := userController.NewUserController(userUsecase)
 
 	// Shop router
-	shopRepo := shopAdapters.NewShopRepository(db)
-	shopFactory := domain.NewShopFactory(256)
+	shopRepo := shopAdapters.NewShopRepository(dbNew)
+	shopFactory := domain.NewShopFactory(256, 256)
 	shopService := service.NewShopService(shopRepo, shopFactory, userRepo)
 	shopHandler := shophandler.ShopHandler{ShopService: shopService}
 
@@ -73,6 +82,8 @@ func httpServer() *chi.Mux {
 		r.Route("/shop", func(r chi.Router) {
 
 			r.Post("/", shopHandler.CreateShop)
+			r.Get("/{id}", shopHandler.GetShopById)
+			r.Get("/", shopHandler.GetAllShops)
 		})
 
 	})
