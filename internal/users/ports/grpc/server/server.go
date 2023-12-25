@@ -13,6 +13,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"time"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -144,9 +145,10 @@ func (s *server) GetUserByID(ctx context.Context, req *pb.GetUserByIdRequest) (*
 		log.Println("Internal error: " + err.Error())
 		return &pb.User{}, status.Error(codes.Internal, "Internal error: "+err.Error())
 	}
+	log.Println("Be careful, Asadbek is connecting to your server now....")
 	createdAtTimestamp := timestamppb.New(user.GetCreatedAt())
 	updatedAtTimestamp := timestamppb.New(user.GetUpdatedAt())
-
+	time.Sleep(time.Second * 6)
 	res := &pb.User{
 		Id:          int64(user.GetID()),
 		PhoneNumber: user.GetPhoneNumber(),
@@ -154,6 +156,18 @@ func (s *server) GetUserByID(ctx context.Context, req *pb.GetUserByIdRequest) (*
 		Role:        user.GetRole(),
 		CreatedAt:   createdAtTimestamp,
 		UpdatedAt:   updatedAtTimestamp,
+	}
+	return res, nil
+}
+
+func (s *server) UserExists(ctx context.Context, req *pb.UserID) (*pb.UserExistsReply, error) {
+	exists, err := s.userUsecase.UserExists(int(req.Id))
+	if err != nil {
+		log.Println("Internal error: " + err.Error())
+		return &pb.UserExistsReply{}, status.Error(codes.Internal, "")
+	}
+	res := &pb.UserExistsReply{
+		Exists: exists,
 	}
 	return res, nil
 }

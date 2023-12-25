@@ -13,6 +13,15 @@ service UserService{
     rpc LoginUser(LoginRequest) returns (LoginReply);
     rpc GetUserByPhoneNumber(PhoneNumberRequest) returns (User);
     rpc GetUserByID (GetUserByIdRequest) returns (User);
+    rpc UserExists (UserID) returns (UserExistsReply);
+}
+
+message UserID {
+    int64 id = 1;
+}
+
+message UserExistsReply {
+    bool exists = 1;
 }
 
 message NewUser {
