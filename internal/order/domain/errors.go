@@ -4,6 +4,8 @@ const (
 	ErrIDScanFailed       = Err("Failed to scan id")
 	ErrBasketUpdateFailed = Err("Failed to update basket")
 	ErrDeleteItemFailed   = Err("Failed to delete Item")
+	ErrAddItemFailed      = Err("Couldn't update quantity")
+	ErrBasketItemsNotFound
 )
 
 type Err string

@@ -31,7 +31,7 @@ func (b *basketRepo) GetBasket(basketId int) (*BasketWithItems, error) {
 	query := `
 		SELECT b.*, bi.id as ItemId, bi.product_id, bi.quantity
 		FROM basket b
-		LEFT JOIN basket_items bi ON b.id = bi.basket_id
+		INNER JOIN basket_items bi ON b.id = bi.basket_id
 		WHERE b.id = $1`
 	rows, err := b.db.Query(query, basketId)
 	if err != nil {
@@ -61,4 +61,12 @@ func (b *basketRepo) GetActiveBasket(userID int) (*domain.Basket, error) {
 		return nil, err
 	}
 	return &basket, nil
+}
+
+func (b *basketRepo) MarkBasketAsPurchased(userId, basketId int) error {
+	_, err := b.db.Exec("UPDATE basket SET purchased = true WHERE user_id = $1 AND basketId = $2", userId, basketId)
+	if err != nil {
+		return err
+	}
+	return nil
 }
