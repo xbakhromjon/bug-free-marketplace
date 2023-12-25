@@ -55,7 +55,7 @@ func (b *basketRepo) GetBasket(basketId int) (*BasketWithItems, error) {
 }
 
 func (b *basketRepo) GetActiveBasket(userID int) (*domain.Basket, error) {
-	row := b.db.QueryRow("SELECT b.basket_id FROM basket b WHERE b.user_id = $1 AND b.purchased = false", userID)
+	row := b.db.QueryRow("SELECT b.id FROM basket b WHERE b.user_id = $1 AND b.purchased = false", userID)
 	var basket domain.Basket
 	if err := row.Scan(&basket.Id, &basket.UserId, &basket.Purchased); err != nil {
 		return nil, err
