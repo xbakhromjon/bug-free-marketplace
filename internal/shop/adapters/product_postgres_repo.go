@@ -15,7 +15,7 @@ type productPostgresRepo struct {
 }
 
 func (p *productPostgresRepo) UpdateProduct(productID int, product *domain.Product) (*domain.Product, error) {
-	_, err := p.db.Exec("UPDATE product SET price=? WHERE id = ?", productID, product.Price)
+	_, err := p.db.Exec(context.Background(), "UPDATE product SET price=? WHERE id = ?", productID, product.Price)
 	if err != nil {
 		return nil, err
 	}

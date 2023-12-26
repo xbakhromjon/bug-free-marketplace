@@ -1,9 +1,9 @@
 package app
 
 import (
-	"golang-project-template/internal/common"
 	"errors"
 	"github.com/stretchr/testify/assert"
+	"golang-project-template/internal/common"
 	"golang-project-template/internal/shop/domain"
 	"reflect"
 	"testing"
@@ -95,7 +95,7 @@ func TestNewProduct(t *testing.T) {
 			mockRepo := &mockProductRepo{
 				SaveFunc: tc.mockSaveFunc,
 			}
-			useCase := NewProductService(mockRepo)
+			useCase := NewProductService(mockRepo, domain.ProductFactory{})
 
 			id, err := useCase.Add(newProduct)
 
