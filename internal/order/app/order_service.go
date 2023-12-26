@@ -6,8 +6,8 @@ type OrderService interface {
 	GetOrderByID(orderID int) (domain.Order, error)
 	GetAllOrders(page int) ([]domain.Order, error)
 	MakeOrderReady(OrderID int) error
-	OrderPaid(OrderID int) error
-	OrderCancelled(OrderID int) error
+	MakeOrderPaid(OrderID int) error
+	MakeOrderCancelled(OrderID int) error
 }
 
 func NewOrderService(repository domain.OrderRepository) OrderService {
