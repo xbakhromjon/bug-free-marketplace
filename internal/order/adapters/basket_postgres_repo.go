@@ -2,32 +2,27 @@ package adapters
 
 import (
 	"github.com/jackc/pgx"
-	"golang-project-template/internal/order/domain"
+	basketdomain "golang-project-template/internal/order/domain"
 )
 
 type basketRepo struct {
 	db *pgx.Conn
 }
 
-func NewCartRepository(db *pgx.Conn) domain.BasketRepository {
+func NewBasketRepository(db *pgx.Conn) basketdomain.BasketRepository {
 	return &basketRepo{db: db}
 }
 
-type BasketWithItems struct {
-	domain.Basket
-	items []domain.BasketItems
-}
-
 func (b *basketRepo) CreateBasket(userId int) (id int, err error) {
-	row := b.db.QueryRow("INSERT INTO basket(user_id,purchased) VALUES ($1,$2) RETURNING id;", userId)
-	err = row.Scan(row)
+	row := b.db.QueryRow("INSERT INTO basket(user_id,purchased) VALUES ($1,false) RETURNING id;", userId)
+	err = row.Scan(&id)
 	if err != nil {
-		return 0, err
+		return 0, basketdomain.ErrIDScanFailed
 	}
 	return id, nil
 }
 
-func (b *basketRepo) GetBasket(basketId int) (*BasketWithItems, error) {
+func (b *basketRepo) GetBasket(basketId int) (*basketdomain.BasketWithItems, error) {
 	query := `
 		SELECT b.*, bi.id as ItemId, bi.product_id, bi.quantity
 		FROM basket b
@@ -37,10 +32,10 @@ func (b *basketRepo) GetBasket(basketId int) (*BasketWithItems, error) {
 	if err != nil {
 		return nil, err
 	}
-	var basketWithItems BasketWithItems
+	var basketWithItems basketdomain.BasketWithItems
 	for rows.Next() {
-		var basket domain.Basket
-		var items domain.BasketItems
+		var basket basketdomain.Basket
+		var items basketdomain.BasketItems
 		err := rows.Scan(
 			&basket.Id, &basket.UserId, &basket.Purchased,
 			&items.Id, &items.BasketId, &items.ProductId, &items.Quantity,
@@ -48,15 +43,15 @@ func (b *basketRepo) GetBasket(basketId int) (*BasketWithItems, error) {
 		if err != nil {
 			return nil, err
 		}
-		basketWithItems.items = append(basketWithItems.items, items)
+		basketWithItems.Items = append(basketWithItems.Items, items)
 		basketWithItems.Basket = basket
 	}
 	return &basketWithItems, nil
 }
 
-func (b *basketRepo) GetActiveBasket(userID int) (*domain.Basket, error) {
+func (b *basketRepo) GetActiveBasket(userID int) (*basketdomain.Basket, error) {
 	row := b.db.QueryRow("SELECT b.id FROM basket b WHERE b.user_id = $1 AND b.purchased = false", userID)
-	var basket domain.Basket
+	var basket basketdomain.Basket
 	if err := row.Scan(&basket.Id, &basket.UserId, &basket.Purchased); err != nil {
 		return nil, err
 	}
