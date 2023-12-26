@@ -1,10 +1,11 @@
 package domain
 
 const (
-	ErrIDScanFailed       = Err("Failed to scan id")
-	ErrBasketUpdateFailed = Err("Failed to update basket")
-	ErrDeleteItemFailed   = Err("Failed to delete Item")
-	ErrAddItemFailed      = Err("Couldn't update quantity")
+	ErrBasketCreationFailed = Err("Failed to create basket")
+	ErrIDScanFailed         = Err("Failed to scan id")
+	ErrBasketUpdateFailed   = Err("Failed to update basket")
+	ErrDeleteItemFailed     = Err("Failed to delete Item")
+	ErrAddItemFailed        = Err("Couldn't update quantity")
 	ErrBasketItemsNotFound
 )
 
