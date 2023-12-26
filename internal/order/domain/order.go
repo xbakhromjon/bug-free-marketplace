@@ -9,6 +9,13 @@ var (
 	ErrOrderNotFound = errors.New("Order not found")
 )
 
+const (
+	OrderInProcess = "ORDER_IN_PROCCES"
+	OrderReady     = "ORDER_READY"
+	OrderPaid      = "ORDER_PAID"
+	OrderCancelled = "ORDER_CANCELLED"
+)
+
 type Order struct {
 	ID         int
 	Number     string

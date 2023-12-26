@@ -33,15 +33,22 @@ func (o *orderRepo) GetOrderByID(orderID int) (domain.Order, error) {
 	return order, err
 }
 
-func (o *orderRepo) GetAllOrders() ([]domain.Order, error) {
-	rows, err := o.db.Query(`SELECT id, number, basket_id, total_price, status, created_at, updated_at FROM orders`)
+func (o *orderRepo) GetPaginatedOrders(offset, limit int) ([]domain.Order, error) {
+	query := `
+		SELECT id, number, basket_id, total_price, status, created_at, updated_at
+		FROM orders
+		ORDER BY created_at DESC
+		LIMIT $1 OFFSET $2
+	`
+
+	rows, err := o.db.Query(query, limit, offset)
 	if err != nil {
 		return nil, err
 	}
 
-	orders := make([]domain.Order, 0)
-
 	defer rows.Close()
+
+	orders := make([]domain.Order, 0)
 
 	for rows.Next() {
 		var order domain.Order
