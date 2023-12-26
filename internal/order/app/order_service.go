@@ -5,7 +5,7 @@ import "golang-project-template/internal/order/domain"
 type OrderService interface {
 	GetOrderByID(orderID int) (domain.Order, error)
 	GetAllOrders(page int) ([]domain.Order, error)
-	OrderReady(OrderID int) error
+	MakeOrderReady(OrderID int) error
 	OrderPaid(OrderID int) error
 	OrderCancelled(OrderID int) error
 }
@@ -33,17 +33,17 @@ func (o *orderService) GetAllOrders(page int) ([]domain.Order, error) {
 	return o.repository.GetPaginatedOrders(offset, pageSize)
 }
 
-func (o *orderService) OrderReady(OrderID int) error {
+func (o *orderService) MakeOrderReady(OrderID int) error {
 	newStatus := domain.OrderReady
 	return o.repository.UpdateStatusOrder(OrderID, newStatus)
 }
 
-func (o *orderService) OrderPaid(OrderID int) error {
+func (o *orderService) MakeOrderPaid(OrderID int) error {
 	newStatus := domain.OrderPaid
 	return o.repository.UpdateStatusOrder(OrderID, newStatus)
 }
 
-func (o *orderService) OrderCancelled(OrderID int) error {
+func (o *orderService) MakeOrderCancelled(OrderID int) error {
 	newStatus := domain.OrderCancelled
 	return o.repository.UpdateStatusOrder(OrderID, newStatus)
 }
