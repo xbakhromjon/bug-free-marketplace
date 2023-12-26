@@ -17,9 +17,9 @@ type User struct {
 }
 
 type NewUser struct {
-	name        string
-	phoneNumber string
-	password    string
+	Name        string
+	PhoneNumber string
+	Password    string
 }
 
 // User-getter
@@ -51,8 +51,8 @@ func (u *User) GetUpdatedAt() time.Time {
 	return u.updatedAt
 }
 
-func (u *User) GetDeletedAt() time.Time {
-	return *u.deletedAt
+func (u *User) GetDeletedAt() *time.Time {
+	return u.deletedAt
 }
 
 // User-setter
@@ -88,36 +88,10 @@ func (u *User) SetDeletedAt(deletedAt *time.Time) {
 	u.deletedAt = deletedAt
 }
 
-// NewUser
-func (n *NewUser) GetName() string {
-	return n.name
-}
-
-func (n *NewUser) GetPhoneNumber() string {
-	return n.phoneNumber
-}
-
-func (n *NewUser) GetPassword() string {
-	return n.password
-}
-
-func (u *NewUser) SetName(name string) {
-	u.name = name
-}
-
-func (u *NewUser) SetPhoneNumber(phoneNumber string) {
-	u.phoneNumber = phoneNumber
-}
-
-func (u *NewUser) SetPassword(password string) {
-	u.password = password
-}
-
 type UserRepository interface {
 	Save(user *User) (int, error)
 	FindOneByPhoneNumber(phoneNumber string) (*User, error)
 	FindByID(userID int) (*User, error)
 	UserExists(userID int) (bool, error)
 	UserExistByPhone(phone string) (bool, error)
-
 }

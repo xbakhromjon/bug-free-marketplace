@@ -184,12 +184,12 @@ func TestLoginUser(t *testing.T) {
 		})
 	}
 }
-func TestGetUserDataPhoneNumber(t *testing.T) {
+func TestGetUserByPhoneNumber(t *testing.T) {
 	underTest := userUsecase{userRepository: &mockUserRepo{}}
 
 	t.Run("success get user by phone", func(t *testing.T) {
 
-		got, err := underTest.GetUserDataPhoneNumber("998990970138")
+		got, err := underTest.GetUserByPhoneNumber("998990970138")
 		wantedUser := createUserWithPhoneNumber("998990970138")
 
 		assertEqual[error](t, err, nil)
@@ -198,12 +198,12 @@ func TestGetUserDataPhoneNumber(t *testing.T) {
 	})
 
 	t.Run("get user by phone (user not found by phone)", func(t *testing.T) {
-		_, err := underTest.GetUserDataPhoneNumber("phone_number")
+		_, err := underTest.GetUserByPhoneNumber("phone_number")
 		assertEqual[error](t, err, domain.ErrUserNotFound)
 	})
 
 	t.Run("get user by phone (empty phone number)", func(t *testing.T) {
-		_, err := underTest.GetUserDataPhoneNumber("")
+		_, err := underTest.GetUserByPhoneNumber("")
 		assertEqual[error](t, err, domain.ErrEmptyPhoneNumber)
 	})
 }
@@ -260,27 +260,27 @@ func assertEqual[T comparable](t testing.TB, got, want T) {
 
 func mockUserForTestRegister() *domain.NewUser {
 	newUser := &domain.NewUser{}
-	newUser.SetName("Quvonchbek")
-	newUser.SetPhoneNumber("998990970138")
-	newUser.SetPassword("Golang123")
+	newUser.Name = "Quvonchbek"
+	newUser.PhoneNumber = "998990970138"
+	newUser.Password = "Golang123"
 
 	return newUser
 }
 
 func mockEmptyNameUserForTestRegister() *domain.NewUser {
 	newUser := &domain.NewUser{}
-	newUser.SetName("")
-	newUser.SetPhoneNumber("998990970138")
-	newUser.SetPassword("Golang123")
+	newUser.Name = ""
+	newUser.PhoneNumber = "998990970138"
+	newUser.Password = "Golang123"
 
 	return newUser
 }
 
 func mockUserWithPhoneForTestRegister(phone string) *domain.NewUser {
 	newUser := &domain.NewUser{}
-	newUser.SetName("Quvonchbek")
-	newUser.SetPhoneNumber(phone)
-	newUser.SetPassword("Golang123")
+	newUser.Name = "Quvonchbek"
+	newUser.PhoneNumber = phone
+	newUser.Password = "Golang123"
 
 	return newUser
 }

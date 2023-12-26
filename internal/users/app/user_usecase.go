@@ -1,7 +1,9 @@
 package app
 
 import (
+	"errors"
 	"golang-project-template/internal/users/domain"
+	"log"
 	"strings"
 )
 
@@ -15,7 +17,7 @@ type UserUsecase interface {
 	RegisterCustomer(user *domain.NewUser) (int, error)
 	RegisterAdmin(user *domain.NewUser) (int, error)
 	LoginUser(phoneNumber, pass string) (bool, error)
-	GetUserDataPhoneNumber(phoneNumber string) (*domain.User, error)
+	GetUserByPhoneNumber(phoneNumber string) (*domain.User, error)
 	GetUserByID(id int) (*domain.User, error)
 	UserExists(id int) (bool, error)
 }
@@ -28,22 +30,47 @@ func NewUserUsecase(userRepository domain.UserRepository) UserUsecase {
 
 func (u *userUsecase) RegisterMerchantUser(newUser *domain.NewUser) (int, error) {
 	userFromFactory := u.f.CreateMerchantUser(newUser)
-	err := validateUserInfoForRegister(userFromFactory.GetName(), userFromFactory.GetPhoneNumber(), userFromFactory.GetPassword())
+
+	//validate user input
+	err := validateUserInfoForRegister(
+		userFromFactory.GetName(),
+		userFromFactory.GetPhoneNumber(),
+		userFromFactory.GetPassword(),
+	)
 	if err != nil {
 		return 0, err
 	}
-
-	id, err := u.userRepository.Save(userFromFactory)
+	err = validatePhoneNumberCount(newUser.PhoneNumber)
 	if err != nil {
+		log.Println("error: phone number count is more than 12")
 		return 0, err
 	}
 
-	return id, nil
+	//check if phone number exists or not
+	exists, err := u.userRepository.UserExistByPhone(userFromFactory.GetPhoneNumber())
+	if err != nil {
+		log.Println("internal error: " + err.Error())
+		return 0, err
+	}
+
+	//register if not exists
+	if exists {
+		return 0, errors.New("phone number already exists")
+	} else {
+		id, err := u.userRepository.Save(userFromFactory)
+		if err != nil {
+			return 0, err
+		}
+
+		return id, nil
+	}
+
 }
 
 func (u *userUsecase) RegisterCustomer(newUser *domain.NewUser) (int, error) {
 	userFromFactory := u.f.CreateCustomerUser(newUser)
 
+	//validate user input
 	err := validateUserInfoForRegister(
 		userFromFactory.GetName(),
 		userFromFactory.GetPhoneNumber(),
@@ -51,17 +78,37 @@ func (u *userUsecase) RegisterCustomer(newUser *domain.NewUser) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-
-	id, err := u.userRepository.Save(userFromFactory)
+	err = validatePhoneNumberCount(newUser.PhoneNumber)
 	if err != nil {
+		log.Println("error: phone number count is more than 12")
 		return 0, err
 	}
 
-	return id, nil
+	//check if phone number exists or not
+	exists, err := u.userRepository.UserExistByPhone(userFromFactory.GetPhoneNumber())
+	if err != nil {
+		log.Println("internal error: " + err.Error())
+		return 0, err
+	}
+
+	//register if not exists
+	if exists {
+		return 0, errors.New("phone number already exists")
+	} else {
+		id, err := u.userRepository.Save(userFromFactory)
+		if err != nil {
+			log.Println("internal error: " + err.Error())
+			return 0, err
+		}
+		return id, nil
+	}
+
 }
 
 func (u *userUsecase) RegisterAdmin(newUser *domain.NewUser) (int, error) {
 	userFromFactory := u.f.CreateAdminUser(newUser)
+
+	//validate user input
 	err := validateUserInfoForRegister(
 		userFromFactory.GetName(),
 		userFromFactory.GetPhoneNumber(),
@@ -69,13 +116,30 @@ func (u *userUsecase) RegisterAdmin(newUser *domain.NewUser) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-
-	id, err := u.userRepository.Save(userFromFactory)
+	err = validatePhoneNumberCount(newUser.PhoneNumber)
 	if err != nil {
+		log.Println("error: phone number count is more than 12")
 		return 0, err
 	}
 
-	return id, nil
+	//check if phone number already exists or not
+	exists, err := u.userRepository.UserExistByPhone(userFromFactory.GetPhoneNumber())
+	if err != nil {
+		log.Println("internal error: " + err.Error())
+		return 0, nil
+	}
+
+	//register if not exists
+	if exists {
+		return 0, errors.New("phone number already exists")
+
+	} else {
+		id, err := u.userRepository.Save(userFromFactory)
+		if err != nil {
+			return 0, err
+		}
+		return id, nil
+	}
 }
 
 func (u *userUsecase) LoginUser(phoneNumber, pass string) (bool, error) {
@@ -93,7 +157,7 @@ func (u *userUsecase) LoginUser(phoneNumber, pass string) (bool, error) {
 	return true, nil
 }
 
-func (u *userUsecase) GetUserDataPhoneNumber(phoneNumber string) (*domain.User, error) {
+func (u *userUsecase) GetUserByPhoneNumber(phoneNumber string) (*domain.User, error) {
 
 	if strings.TrimSpace(phoneNumber) == "" {
 		return nil, domain.ErrEmptyPhoneNumber
