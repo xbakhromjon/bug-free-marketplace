@@ -3,8 +3,6 @@ package app
 import (
 	"fmt"
 	"golang-project-template/internal/common/postgres"
-	userClient "golang-project-template/internal/users/ports/grpc/client"
-	userGrpcServer "golang-project-template/internal/users/ports/grpc/server"
 	"os"
 
 	"golang-project-template/internal/common"
@@ -15,6 +13,7 @@ import (
 	shophandler "golang-project-template/internal/shop/ports/rest/handler"
 	userAdapters "golang-project-template/internal/users/adapters"
 	userApp "golang-project-template/internal/users/app"
+	"golang-project-template/internal/users/ports/grpc/server"
 	userController "golang-project-template/internal/users/ports/http/controller"
 	"log"
 	"net/http"
@@ -30,14 +29,7 @@ var rootCmd = &cobra.Command{Use: "run-grpc"}
 var userGrpcServerCmd = &cobra.Command{
 	Use: "user-grpc-server",
 	Run: func(cmd *cobra.Command, args []string) {
-		userGrpcServer.RunGRPCServer()
-	},
-}
-
-var userClientCmd = &cobra.Command{
-	Use: "user-grpc-client",
-	Run: func(cmd *cobra.Command, args []string) {
-		userClient.RunGRPCClient()
+		server.RunGRPCServer()
 	},
 }
 
@@ -50,7 +42,6 @@ var httpCmd = &cobra.Command{
 
 func Execute() {
 	rootCmd.AddCommand(userGrpcServerCmd)
-	rootCmd.AddCommand(userClientCmd)
 	rootCmd.AddCommand(httpCmd)
 
 	if err := rootCmd.Execute(); err != nil {
