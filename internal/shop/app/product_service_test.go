@@ -3,7 +3,9 @@ package app
 import (
 	"errors"
 	"github.com/stretchr/testify/assert"
+	"golang-project-template/internal/common"
 	"golang-project-template/internal/shop/domain"
+	"reflect"
 	"testing"
 )
 
@@ -35,6 +37,41 @@ func TestGetOneProduct(t *testing.T) {
 	})
 }
 
+func TestFilter(t *testing.T) {
+	underTest := productService{repository: newMockProductRepo()}
+	t.Run("result proper with repository returned result", func(t *testing.T) {
+		searchModel := underTest.factory.CreateNewSearchModel("T-shirt", 10, 20)
+		got, err := underTest.Filter(*searchModel)
+		if err != nil {
+			t.Errorf("expected ok but %q error occured", err)
+		}
+
+		want, _ := underTest.repository.FindAll(*searchModel)
+
+		if !reflect.DeepEqual(want, got) {
+			t.Errorf("want %+v but got %+v", want, got)
+		}
+	})
+}
+
+func TestFilterByPageable(t *testing.T) {
+	underTest := productService{repository: newMockProductRepo()}
+	t.Run("result proper with that repository returned result", func(t *testing.T) {
+		searchModel := *underTest.factory.CreateNewSearchModel("T-shirt", 10, 20)
+		pageableRequest := *common.CreateDefaultPageableRequest()
+		got, err := underTest.FilterByPageable(searchModel, pageableRequest)
+		if err != nil {
+			t.Errorf("expected ok but %q error occured", err)
+		}
+
+		content, totalCount, _ := underTest.repository.FindAllWithPageable(searchModel, pageableRequest)
+		want := common.CreatePageableResult(content, totalCount)
+		if !reflect.DeepEqual(want, got) {
+			t.Errorf("want %+v but got %+v", want, got)
+		}
+	})
+}
+
 func TestNewProduct(t *testing.T) {
 	newProduct := domain.NewProduct{
 		Name:   "Test Product",
@@ -58,7 +95,7 @@ func TestNewProduct(t *testing.T) {
 			mockRepo := &mockProductRepo{
 				SaveFunc: tc.mockSaveFunc,
 			}
-			useCase := NewProductService(mockRepo)
+			useCase := NewProductService(mockRepo, domain.ProductFactory{})
 
 			id, err := useCase.Add(newProduct)
 
@@ -99,6 +136,16 @@ func (m *mockProductRepo) FindAllByShopId(shopId int) ([]*domain.Product, error)
 	panic("implement me")
 }
 
+func (m *mockProductRepo) FindAll(searchModel domain.ProductSearchModel) ([]*domain.Product, error) {
+	resp := newValidProductListWithName("T-shirt")
+	return resp, nil
+}
+
+func (m *mockProductRepo) FindAllWithPageable(searchModel domain.ProductSearchModel, pageable common.PageableRequest) ([]*domain.Product, int, error) {
+	result := newValidProductListWithName("T-shirt")
+	return result, 1, nil
+}
+
 func newValidProduct() *domain.Product {
 	return &domain.Product{
 		Id:     1,
@@ -106,4 +153,14 @@ func newValidProduct() *domain.Product {
 		Price:  100,
 		ShopId: 1,
 	}
+}
+
+func newValidProductListWithName(name string) []*domain.Product {
+	list := []*domain.Product{{
+		Id:     1,
+		Name:   name,
+		Price:  100,
+		ShopId: 1,
+	}}
+	return list
 }
