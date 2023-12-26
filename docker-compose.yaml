@@ -16,6 +16,23 @@ services:
       - .env
     environment:
       GOCACHE: /go-cache
+
+  users-grpc:
+    build:
+      context: ./docker/dev
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+      - ./.go/pkg:/go/pkg
+      - ./.go-cache:/go-cache
+    working_dir: /app
+    ports:
+      - "5006:5006"
+    env_file:
+      - .env
+    environment:
+      GOCACHE: /go-cache
+
   migrate:
     image: migrate/migrate
     volumes:

@@ -192,12 +192,12 @@ func RunGRPCServer() {
 	userUsecase := userApp.NewUserUsecase(userRepo)
 	userGrpcServer := NewUserGrpcServer(userUsecase)
 
-	lis, err := net.Listen("tcp", ":5005")
+	lis, err := net.Listen("tcp", ":5006")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	fmt.Println("listening on port: 5005")
+	fmt.Println("listening on port: 5006")
 
 	s := grpc.NewServer()
 
