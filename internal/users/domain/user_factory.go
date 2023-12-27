@@ -67,7 +67,7 @@ func (f UserFactory) ParseModelToDomain(
 }
 
 const (
-	ErrUserNotFound       = Err("user not found")
+	ErrUserNotFound       = Err("user is not registered yet")
 	ErrEmptyUserName      = Err("user name can not be empty")
 	ErrEmptyPhoneNumber   = Err("phone number can not be empty")
 	ErrInvalidCredentials = Err("bad credentials")
