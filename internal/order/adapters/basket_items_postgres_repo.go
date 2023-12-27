@@ -44,11 +44,3 @@ func (b basketItemRepo) UpdateBasketItem(bItemId, quantity int) error {
 	}
 	return nil
 }
-
-func (b basketItemRepo) DeleteProduct(bItemId int) error {
-	err := b.db.QueryRow("delete from basket_items where id = $1 AND product_id = $2 RETURNING id", bItemId)
-	if err != nil {
-		return domain.ErrDeleteItemFailed
-	}
-	return nil
-}
