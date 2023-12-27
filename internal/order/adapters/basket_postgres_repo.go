@@ -22,7 +22,7 @@ func (b *basketRepo) CreateBasket(userId int) (id int, err error) {
 	return id, nil
 }
 
-func (b *basketRepo) GetBasket(basketId int) (*basketdomain.BasketWithItems, error) {
+func (b *basketRepo) GetBasketWithItems(basketId int) (*basketdomain.BasketWithItems, error) {
 	query := `
 		SELECT b.*, bi.id as ItemId, bi.product_id, bi.quantity
 		FROM basket b
@@ -32,6 +32,7 @@ func (b *basketRepo) GetBasket(basketId int) (*basketdomain.BasketWithItems, err
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	var basketWithItems basketdomain.BasketWithItems
 	for rows.Next() {
 		var basket basketdomain.Basket
@@ -50,7 +51,7 @@ func (b *basketRepo) GetBasket(basketId int) (*basketdomain.BasketWithItems, err
 }
 
 func (b *basketRepo) GetActiveBasket(userID int) (*basketdomain.Basket, error) {
-	row := b.db.QueryRow("SELECT b.id FROM basket b WHERE b.user_id = $1 AND b.purchased = false", userID)
+	row := b.db.QueryRow("SELECT b.id,b.user_id,b.purchased FROM basket as b WHERE b.user_id = $1 AND b.purchased = false", userID)
 	var basket basketdomain.Basket
 	if err := row.Scan(&basket.Id, &basket.UserId, &basket.Purchased); err != nil {
 		return nil, err
