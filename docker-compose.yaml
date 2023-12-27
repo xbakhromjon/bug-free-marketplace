@@ -18,23 +18,6 @@ services:
       GOCACHE: /go-cache
     entrypoint: ["./docker/dev/entrypoint.sh", "./cmd/main.go", "http-server"]
 
-  users-grpc:
-    build:
-      context: .
-      dockerfile: docker/dev/Dockerfile
-    volumes:
-      - .:/app
-      - ./.go/pkg:/go/pkg
-      - ./.go-cache:/go-cache
-    working_dir: /app
-    ports:
-      - "5006:5006"
-    env_file:
-      - .env
-    environment:
-      GOCACHE: /go-cache
-    entrypoint: ["./docker/dev/entrypoint.sh", "./cmd/main.go", "user-grpc-server"]
-
   migrate:
     image: migrate/migrate
     volumes:
