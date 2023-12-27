@@ -1,8 +1,8 @@
 package domain
 
 type BasketItems struct {
-	Id        int
-	BasketId  int
-	ProductId int
-	Quantity  int
+	Id        int `json:"id"`
+	BasketId  int `json:"basketId"`
+	ProductId int `json:"productId"`
+	Quantity  int `json:"quantity"`
 }
