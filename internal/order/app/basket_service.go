@@ -33,20 +33,28 @@ func (b *basketService) CreateBasket(userID int) (int, error) {
 	return basketId, nil
 }
 
-func (b *basketService) AddItem(userId int, bItems *domain.BasketItems) (int, error) {
-	activeBasket, _ := b.basketRepo.GetActiveBasket(userId)
+func (b *basketService) AddItem(userId int, bItems *domain.BasketItems) (id int, err error) {
+	activeBasket, err := b.basketRepo.GetActiveBasket(userId)
+	if err != nil {
+		return 0, domain.ErrGetActiveBasketFailed
+	}
 	if !activeBasket.Purchased {
-		id, err := b.basketItemRepo.AddItem(bItems)
+		id, err := b.basketItemRepo.AddItem(&domain.BasketItems{
+			BasketId:  activeBasket.Id,
+			ProductId: bItems.ProductId,
+			Quantity:  bItems.Quantity,
+		})
 		if err != nil {
 			return 0, domain.ErrAddItemFailed
 		}
-		return id, err
+		return id, nil
 	}
+
 	newBasketId, err := b.basketRepo.CreateBasket(userId)
 	if err != nil {
 		return 0, domain.ErrBasketCreationFailed
 	}
-	id, err := b.basketItemRepo.AddItem(&domain.BasketItems{
+	id, err = b.basketItemRepo.AddItem(&domain.BasketItems{
 		BasketId:  newBasketId,
 		ProductId: bItems.ProductId,
 		Quantity:  bItems.Quantity,
@@ -54,11 +62,12 @@ func (b *basketService) AddItem(userId int, bItems *domain.BasketItems) (int, er
 	if err != nil {
 		return 0, domain.ErrAddItemFailed
 	}
+
 	return id, nil
 }
 
 func (b *basketService) GetBasketWithItemsById(basketId int) (*domain.BasketWithItems, error) {
-	bWithItems, err := b.basketRepo.GetBasket(basketId)
+	bWithItems, err := b.basketRepo.GetBasketWithItems(basketId)
 	if err != nil {
 		return nil, err
 	}
