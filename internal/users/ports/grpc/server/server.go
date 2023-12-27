@@ -2,20 +2,13 @@ package server
 
 import (
 	"context"
-	"fmt"
-	"golang-project-template/internal/common"
 	"golang-project-template/internal/pkg/jwt"
-	userAdapters "golang-project-template/internal/users/adapters"
 	"golang-project-template/internal/users/app"
-	userApp "golang-project-template/internal/users/app"
 	"golang-project-template/internal/users/domain"
 	"golang-project-template/internal/users/ports/grpc/proto/pb"
 	"log"
-	"net"
-	"os"
 	"time"
 
-	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -170,39 +163,4 @@ func (s *server) UserExists(ctx context.Context, req *pb.UserID) (*pb.UserExists
 		Exists: exists,
 	}
 	return res, nil
-}
-
-func RunGRPCServer() {
-	// Init database
-	db, err := common.ConnectToDb(
-		os.Getenv("POSTGRES_HOST"),
-		os.Getenv("POSTGRES_PORT"),
-		os.Getenv("POSTGRES_DATABASE"),
-		os.Getenv("POSTGRES_USER"),
-		os.Getenv("POSTGRES_PASSWORD"),
-	)
-
-	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
-	}
-
-	defer db.Close()
-
-	userRepo := userAdapters.NewUserRepository(db)
-	userUsecase := userApp.NewUserUsecase(userRepo)
-	userGrpcServer := NewUserGrpcServer(userUsecase)
-
-	lis, err := net.Listen("tcp", ":5006")
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-	}
-
-	fmt.Println("listening on port: 5006")
-
-	s := grpc.NewServer()
-
-	pb.RegisterUserServiceServer(s, userGrpcServer)
-	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
-	}
 }

@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"golang-project-template/internal/common/postgres"
+	"net"
 	"os"
 
 	"golang-project-template/internal/common"
@@ -13,12 +14,14 @@ import (
 	shophandler "golang-project-template/internal/shop/ports/rest/handler"
 	userAdapters "golang-project-template/internal/users/adapters"
 	userApp "golang-project-template/internal/users/app"
+	"golang-project-template/internal/users/ports/grpc/proto/pb"
 	"golang-project-template/internal/users/ports/grpc/server"
 	userController "golang-project-template/internal/users/ports/http/controller"
 	"log"
 	"net/http"
 
 	"github.com/spf13/cobra"
+	"google.golang.org/grpc"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -29,7 +32,35 @@ var rootCmd = &cobra.Command{Use: "run-grpc"}
 var userGrpcServerCmd = &cobra.Command{
 	Use: "user-grpc-server",
 	Run: func(cmd *cobra.Command, args []string) {
-		server.RunGRPCServer()
+		db, err := common.ConnectToDb(
+			os.Getenv("POSTGRES_HOST"),
+			os.Getenv("POSTGRES_PORT"),
+			os.Getenv("POSTGRES_DATABASE"),
+			os.Getenv("POSTGRES_USER"),
+			os.Getenv("POSTGRES_PASSWORD"),
+		)
+
+		if err != nil {
+			log.Fatalf("Failed to connect to database: %v", err)
+		}
+		userRepo := userAdapters.NewUserRepository(db)
+		userUsecase := userApp.NewUserUsecase(userRepo)
+		userGrpcServer := server.NewUserGrpcServer(userUsecase)
+
+		lis, err := net.Listen("tcp", ":5006")
+		if err != nil {
+			log.Fatalf("failed to listen: %v", err)
+		}
+
+		fmt.Println("listening on port: 5006")
+
+		s := grpc.NewServer()
+
+		pb.RegisterUserServiceServer(s, userGrpcServer)
+		if err := s.Serve(lis); err != nil {
+			log.Fatalf("failed to serve: %v", err)
+		}
+
 	},
 }
 
