@@ -8,6 +8,7 @@ type BasketService interface {
 	CreateBasket(userID int) (int, error)
 	AddItem(userId int, basket *domain.BasketItems) (int, error)
 	GetBasketWithItemsById(basketId int) (*domain.BasketWithItems, error)
+	GetActiveBaskets(userId int) (*domain.Basket, error)
 	GetAll(basketId int) ([]domain.BasketItems, error)
 	UpdateBasketQuantity(bItemId, quantity int) error
 	MarkBasketAsPurchased(userId, basketId int) error
@@ -72,6 +73,14 @@ func (b *basketService) GetBasketWithItemsById(basketId int) (*domain.BasketWith
 		return nil, err
 	}
 	return bWithItems, nil
+}
+
+func (b *basketService) GetActiveBaskets(userId int) (*domain.Basket, error) {
+	basket, err := b.basketRepo.GetActiveBasket(userId)
+	if err != nil {
+		return nil, err
+	}
+	return basket, nil
 }
 
 func (b *basketService) GetAll(basketId int) ([]domain.BasketItems, error) {
