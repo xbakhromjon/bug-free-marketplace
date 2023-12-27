@@ -34,6 +34,7 @@ func (b *basketItemRepo) GetAll(basketId int) ([]basketItem.BasketItems, error) 
 		err := row.Scan(&bItems.Id, &bItems.BasketId, &bItems.ProductId, &bItems.Quantity)
 		if err != nil {
 			return nil, basketItem.ErrIDScanFailed
+			return nil, err
 		}
 		Items = append(Items, bItems)
 	}

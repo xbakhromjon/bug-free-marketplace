@@ -1,5 +1,12 @@
 package domain
 
+import (
+	"errors"
+	"golang-project-template/internal/common"
+)
+
+var saveShopError = errors.New("save shop error")
+
 type ShopRepository interface {
 	Save(*Shop) (int, error)
 	CheckShopNameExists(string) (bool, error)
@@ -15,6 +22,8 @@ type ProductRepository interface {
 	Save(product *Product) (int, error)
 	FindById(id int) (*Product, error)
 	FindAllByShopId(shopId int) ([]*Product, error)
+	FindAll(model ProductSearchModel) ([]*Product, error)
+	FindAllWithPageable(searchModel ProductSearchModel, pageable common.PageableRequest) ([]*Product, int, error)
 	UpdateProduct(productID int, product *Product) (*Product, error)
 }
 
