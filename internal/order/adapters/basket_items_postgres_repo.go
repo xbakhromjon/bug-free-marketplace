@@ -18,7 +18,7 @@ func (b basketItemRepo) AddItem(items *domain.BasketItems) (id int, err error) {
 		items.BasketId, items.ProductId, items.Quantity)
 	err = row.Scan(&id)
 	if err != nil {
-		return 0, domain.ErrIDScanFailed
+		return 0, err
 	}
 	return id, nil
 }
@@ -30,7 +30,7 @@ func (b basketItemRepo) GetAll(basketId int) ([]domain.BasketItems, error) {
 		var bItems domain.BasketItems
 		err := row.Scan(&bItems.Id, &bItems.BasketId, &bItems.ProductId, &bItems.Quantity)
 		if err != nil {
-			return nil, domain.ErrIDScanFailed
+			return nil, err
 		}
 		Items = append(Items, bItems)
 	}
@@ -40,15 +40,7 @@ func (b basketItemRepo) GetAll(basketId int) ([]domain.BasketItems, error) {
 func (b basketItemRepo) UpdateBasketItem(bItemId, quantity int) error {
 	_, err := b.db.Exec("UPDATE basket_items SET quantity = quantity + $1 WHERE id = $2", quantity, bItemId)
 	if err != nil {
-		return domain.ErrBasketUpdateFailed
-	}
-	return nil
-}
-
-func (b basketItemRepo) DeleteProduct(bItemId int) error {
-	err := b.db.QueryRow("delete from basket_items where id = $1 AND product_id = $2 RETURNING id", bItemId)
-	if err != nil {
-		return domain.ErrDeleteItemFailed
+		return err
 	}
 	return nil
 }
