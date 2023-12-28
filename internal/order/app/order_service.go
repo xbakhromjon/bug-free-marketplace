@@ -51,7 +51,7 @@ func (o *orderService) CreateOrder(userID, basketID int) error {
 		}
 
 		// Calculate total order amount
-		totalAmount += product.Price * item.Quantity
+		totalAmount += product.GetPrice() * item.Quantity
 
 	}
 
