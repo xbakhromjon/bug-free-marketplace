@@ -1,11 +1,31 @@
 package domain
 
 type Product struct {
-	Id     int
-	Name   string
-	Price  int
-	ShopId int
-	Count  int
+	id     int
+	name   string
+	price  int
+	shopId int
+	count  int
+}
+
+func (p *Product) GetId() int {
+	return p.id
+}
+
+func (p *Product) GetName() string {
+	return p.name
+}
+
+func (p *Product) GetPrice() int {
+	return p.price
+}
+
+func (p *Product) GetShopId() int {
+	return p.shopId
+}
+
+func (p *Product) GetCount() int {
+	return p.count
 }
 
 type NewProduct struct {
