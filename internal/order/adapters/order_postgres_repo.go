@@ -26,7 +26,6 @@ func (o *orderRepo) CreateOrder(order domain.Order) error {
 
 func (o *orderRepo) GetOrderByID(orderID int) (domain.Order, error) {
 	var order domain.Order
-	fmt.Println("order id in repo: ", orderID)
 	err := o.db.QueryRow(`SELECT id, number, basket_id, total_price, status, created_at, updated_at FROM orders WHERE id = $1`, orderID).
 		Scan(&order.ID, &order.Number, &order.BasketID, &order.TotalPrice, &order.Status, &order.CreatedAt, &order.UpdatedAt)
 
