@@ -1,10 +1,10 @@
 package adapters
 
 import (
-	"database/sql"
 	"fmt"
-	"github.com/jackc/pgx"
 	"golang-project-template/internal/order/domain"
+
+	"github.com/jackc/pgx"
 )
 
 type orderRepo struct {
@@ -16,18 +16,21 @@ func NewOrderRepository(db *pgx.Conn) domain.OrderRepository {
 }
 
 func (o *orderRepo) CreateOrder(order domain.Order) error {
-	_, err := o.db.Exec(`INSERT INTO orders (number, basket_id, total_price, status, created_at, updated_at) values ($1, $2, $3, $4, $5, $6)`,
-		order.Number, order.BasketID, order.TotalPrice, order.Status, order.CreatedAt, order.UpdatedAt)
+	err := o.db.QueryRow(
+		"INSERT INTO orders (number, basket_id, total_price, status, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
+		order.Number, order.BasketID, order.TotalPrice, order.Status, order.CreatedAt, order.UpdatedAt).
+		Scan(&order.ID)
 
 	return err
 }
 
 func (o *orderRepo) GetOrderByID(orderID int) (domain.Order, error) {
 	var order domain.Order
+	fmt.Println("order id in repo: ", orderID)
 	err := o.db.QueryRow(`SELECT id, number, basket_id, total_price, status, created_at, updated_at FROM orders WHERE id = $1`, orderID).
 		Scan(&order.ID, &order.Number, &order.BasketID, &order.TotalPrice, &order.Status, &order.CreatedAt, &order.UpdatedAt)
 
-	if err != sql.ErrNoRows {
+	if err != nil {
 		return order, domain.ErrOrderNotFound
 	}
 	return order, err
