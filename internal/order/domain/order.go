@@ -1,12 +1,7 @@
 package domain
 
 import (
-	"errors"
 	"time"
-)
-
-var (
-	ErrOrderNotFound = errors.New("Order not found")
 )
 
 type Order struct {
