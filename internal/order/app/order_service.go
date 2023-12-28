@@ -9,7 +9,7 @@ import (
 )
 
 type OrderService interface {
-	CreateOrder(basketID int) error
+	CreateOrder(userID, basketID int) error
 	GetOrderByID(orderID int) (domain.Order, error)
 	GetAllOrders(page int) ([]domain.Order, error)
 	MakeOrderReady(OrderID int) error
@@ -29,7 +29,13 @@ func NewOrderService(repo domain.OrderRepository, basketservice BasketService, p
 	}
 }
 
-func (o *orderService) CreateOrder(basketID int) error {
+func (o *orderService) CreateOrder(userID, basketID int) error {
+
+	err := o.basketService.MarkBasketAsPurchased(userID, basketID)
+	if err != nil {
+		return err
+	}
+
 	basketItems, err := o.basketService.GetAll(basketID)
 	if err != nil {
 		return err
