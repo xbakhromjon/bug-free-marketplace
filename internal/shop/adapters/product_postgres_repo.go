@@ -11,23 +11,24 @@ import (
 )
 
 type productPostgresRepo struct {
-	db *pgx.Conn
+	db      *pgx.Conn
+	factory *domain.ProductFactory
+}
+
+func NewProductRepository(db *pgx.Conn, factory *domain.ProductFactory) domain.ProductRepository {
+	return &productPostgresRepo{db: db, factory: factory}
 }
 
 func (p *productPostgresRepo) UpdateProduct(productID int, product *domain.Product) (*domain.Product, error) {
-	_, err := p.db.Exec(context.Background(), "UPDATE product SET price=? WHERE id = ?", productID, product.Price)
+	_, err := p.db.Exec(context.Background(), "UPDATE product SET price=? WHERE id = ?", productID, product.GetPrice())
 	if err != nil {
 		return nil, err
 	}
 	return product, nil
 }
 
-func NewProductRepository(db *pgx.Conn) domain.ProductRepository {
-	return &productPostgresRepo{db: db}
-}
-
 func (p productPostgresRepo) Save(product *domain.Product) (int, error) {
-	row := p.db.QueryRow(context.Background(), "INSERT INTO product (name, shop_id, price, count) VALUES ($1, $2, $3, $4) RETURNING id", product.Name, product.ShopId, product.Price, product.Count)
+	row := p.db.QueryRow(context.Background(), "INSERT INTO product (name, shop_id, price, count) VALUES ($1, $2, $3, $4) RETURNING id", product.GetName(), product.GetShopId(), product.GetPrice(), product.GetCount())
 	var id int
 	err := row.Scan(&id)
 	if err != nil {
@@ -82,12 +83,15 @@ func (p *productPostgresRepo) FindAll(searchModel domain.ProductSearchModel) ([]
 
 	// scan rows and add to result
 	for rows.Next() {
-		var product domain.Product
-		err := rows.Scan(&product.Id, &product.Name, &product.Price, &product.ShopId)
+		var id int
+		var name string
+		var price int
+		var shopId int
+		err := rows.Scan(&id, &name, &price, &shopId)
 		if err != nil {
 			return nil, err
 		}
-		result = append(result, &product)
+		result = append(result, p.factory.CreateExistProduct(id, name, price, shopId))
 	}
 	return result, nil
 }
@@ -117,12 +121,15 @@ func (p *productPostgresRepo) FindAllWithPageable(searchModel domain.ProductSear
 
 	// scan rows and add to result
 	for rows.Next() {
-		var product domain.Product
-		err := rows.Scan(&product.Id, &product.Name, &product.Price, &product.ShopId)
+		var id int
+		var name string
+		var price int
+		var shopId int
+		err := rows.Scan(&id, &name, &price, &shopId)
 		if err != nil {
 			return nil, 0, err
 		}
-		result = append(result, &product)
+		result = append(result, p.factory.CreateExistProduct(id, name, price, shopId))
 	}
 
 	return result, totalCount, nil
