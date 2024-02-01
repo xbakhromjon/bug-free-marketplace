@@ -3,8 +3,8 @@ version: '3.8'
 services:
   app:
     build:
-      context: ./docker/dev
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: docker/dev/Dockerfile
     volumes:
       - .:/app
       - ./.go/pkg:/go/pkg
@@ -17,8 +17,6 @@ services:
     environment:
       GOCACHE: /go-cache
     entrypoint: ["./docker/dev/entrypoint.sh", "./cmd/main.go", "http-server"]
-    
-
   users-grpc:
     build:
       context: ./docker/dev

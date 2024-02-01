@@ -30,11 +30,7 @@ func (p *productService) UpdateProduct(productID int, product *domain.Product) e
 }
 
 func (p *productService) Add(req domain.NewProduct) (int, error) {
-	product := &domain.Product{
-		Name:   req.Name,
-		Price:  req.Price,
-		ShopId: req.ShopId,
-	}
+	product := p.factory.NewProduct(req.Name, req.Price, req.ShopId)
 	id, err := p.repository.Save(product)
 	if err != nil {
 		return 0, err
