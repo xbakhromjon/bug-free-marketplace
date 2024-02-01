@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+package grpc;
+
+option go_package = "/pb";
+
+import "google/protobuf/timestamp.proto";
+
+service UserService{
+    rpc RegisterMerchantUser(NewUser) returns (MerchantReply);
+    rpc RegisterCustomer(NewUser) returns (CustomerReply);
+    rpc RegisterAdmin(NewUser) returns (AdminReply);
+    rpc LoginUser(LoginRequest) returns (LoginReply);
+    rpc GetUserByPhoneNumber(PhoneNumberRequest) returns (User);
+    rpc GetUserByID (GetUserByIdRequest) returns (User);
+    rpc UserExists (UserID) returns (UserExistsReply);
+}
+
+message UserID {
+    int64 id = 1;
+}
+
+message UserExistsReply {
+    bool exists = 1;
+}
+
+message NewUser {
+    string name = 1;
+    string phoneNumber = 2;
+    string password = 3;
+}
+
+message MerchantReply{
+    int64 id = 1;
+}
+
+message CustomerReply {
+    int64 id = 2;
+}
+
+message AdminReply {
+    int64 id = 3;
+}
+
+message LoginRequest {
+    string phoneNumber = 1;
+    string password = 2;
+}
+
+message LoginReply {
+    bool success = 1;
+    string token = 2;
+}
+
+message PhoneNumberRequest {
+    string phone_number = 1;
+}
+
+message User {
+    int64 id = 1;
+    string name = 2;
+    string phone_number = 3;
+    string role = 4;
+    google.protobuf.Timestamp created_at = 5;
+    google.protobuf.Timestamp updated_at = 6;
+    google.protobuf.Timestamp deleted_at = 7;
+}
+
+message GetUserByIdRequest {
+    int64 id = 1;
+}
